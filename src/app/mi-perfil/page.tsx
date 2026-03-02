@@ -73,13 +73,13 @@ export default function MiPerfilPage() {
         <div className="bg-gradient-to-r from-amber-700 to-amber-800 px-6 py-6 text-white">
           <div className="flex items-center gap-4">
             <div className="w-14 h-14 rounded-full bg-amber-200 flex items-center justify-center text-amber-800 text-xl font-bold">
-              {(session.user.nombre || session.user.username || "U")
+              {(session.user.name || session.user.username || "U")
                 .charAt(0)
                 .toUpperCase()}
             </div>
             <div>
               <h1 className="text-xl font-bold">
-                {session.user.nombre || session.user.username}
+                {session.user.name || session.user.username}
               </h1>
               <p className="text-amber-200 text-sm">@{session.user.username}</p>
             </div>

@@ -42,7 +42,7 @@ export default function NavUsuario() {
         className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-amber-600 transition"
       >
         <div className="w-7 h-7 rounded-full bg-amber-200 flex items-center justify-center text-amber-800 font-bold text-sm">
-          {(session.user.nombre || session.user.username || "U")
+          {(session.user.name || session.user.username || "U")
             .charAt(0)
             .toUpperCase()}
         </div>
