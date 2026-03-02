@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import AuthProvider from "@/components/AuthProvider";
+import NavUsuario from "@/components/NavUsuario";
+import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Parroquias de Madrid",
@@ -24,27 +27,32 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-screen bg-slate-50 text-slate-800 antialiased">
-        {/* Cabecera */}
-        <header className="bg-gradient-to-r from-amber-700 via-amber-800 to-amber-900 text-white shadow-md">
-          <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
-            <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
-              ⛪ Parroquias de Madrid
-            </h1>
-            <p className="mt-1 text-sm text-amber-200">
-              Archidiócesis de Madrid — Explorador interactivo
-            </p>
-          </div>
-        </header>
+        <AuthProvider>
+          {/* Cabecera */}
+          <header className="bg-gradient-to-r from-amber-700 via-amber-800 to-amber-900 text-white shadow-md">
+            <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8 flex items-center justify-between">
+              <Link href="/" className="hover:opacity-90 transition">
+                <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
+                  ⛪ Parroquias de Madrid
+                </h1>
+                <p className="mt-1 text-sm text-amber-200">
+                  Archidiócesis de Madrid — Explorador interactivo
+                </p>
+              </Link>
+              <NavUsuario />
+            </div>
+          </header>
 
-        {/* Contenido principal */}
-        <main className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
-          {children}
-        </main>
+          {/* Contenido principal */}
+          <main className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
+            {children}
+          </main>
 
-        {/* Pie de página */}
-        <footer className="border-t border-slate-200 bg-white py-4 text-center text-xs text-slate-400">
-          MazoIglesias — Forjado en la Forja Nova 🔥
-        </footer>
+          {/* Pie de página */}
+          <footer className="border-t border-slate-200 bg-white py-4 text-center text-xs text-slate-400">
+            MazoIglesias — Forjado en la Forja Nova 🔥
+          </footer>
+        </AuthProvider>
       </body>
     </html>
   );

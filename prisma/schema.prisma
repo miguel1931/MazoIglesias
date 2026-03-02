@@ -1,0 +1,63 @@
+// Prisma schema para MazoIglesias
+// Base de datos: Vercel Postgres (Neon)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("POSTGRES_PRISMA_URL")
+  directUrl = env("POSTGRES_URL_NON_POOLING")
+}
+
+// ─── USUARIO ────────────────────────────────────────────
+model User {
+  id            String    @id @default(cuid())
+  username      String    @unique @db.VarChar(30)
+  email         String    @unique @db.VarChar(255)
+  passwordHash  String    @db.VarChar(255)
+  nombre        String    @db.VarChar(100)
+  bio           String?   @db.VarChar(300)
+  avatarUrl     String?
+  isPublic      Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  visits     Visit[]
+  photos     Photo[]
+
+  @@index([username])
+  @@index([email])
+}
+
+// ─── VISITA A PARROQUIA ─────────────────────────────────
+model Visit {
+  id            String    @id @default(cuid())
+  userId        String
+  parroquiaId   String    @db.VarChar(100)  // ID del JSON local
+  nota          String?   @db.VarChar(500)  // Comentario personal
+  visitedAt     DateTime  @default(now())
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, parroquiaId])  // Un usuario solo puede marcar una vez cada parroquia
+  @@index([userId])
+  @@index([parroquiaId])
+}
+
+// ─── FOTO DE PARROQUIA ──────────────────────────────────
+model Photo {
+  id            String    @id @default(cuid())
+  userId        String
+  parroquiaId   String    @db.VarChar(100)
+  url           String    // URL de Vercel Blob
+  caption       String?   @db.VarChar(200)
+  createdAt     DateTime  @default(now())
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([parroquiaId])
+  @@index([userId, parroquiaId])
+}
