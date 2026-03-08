@@ -5,6 +5,7 @@ import type { Parroquia } from "@/types/parroquia";
 import parroquiasData from "../../public/parroquias.json";
 import Filtros from "@/components/Filtros";
 import ListadoParroquias from "@/components/ListadoParroquias";
+import { useVisitadas } from "@/hooks/useVisitadas";
 import dynamic from "next/dynamic";
 
 // Cargamos el mapa solo en el cliente (Leaflet necesita window)
@@ -21,22 +22,20 @@ const todasLasParroquias: Parroquia[] = parroquiasData as Parroquia[];
 
 export default function HomePage() {
   const [busqueda, setBusqueda] = useState("");
-  const [vicariaSeleccionada, setVicariaSeleccionada] = useState<number | null>(
-    null
-  );
-  const [parroquiaSeleccionada, setParroquiaSeleccionada] =
-    useState<Parroquia | null>(null);
+  const [vicariaSeleccionada, setVicariaSeleccionada] = useState<number | null>(null);
+  const [soloVisitadas, setSoloVisitadas] = useState(false);
+  const [parroquiaSeleccionada, setParroquiaSeleccionada] = useState<Parroquia | null>(null);
+
+  const { visitadas, toggleVisitada, exportar, importar } = useVisitadas();
 
   // Filtrado
   const parroquiasFiltradas = useMemo(() => {
     let lista = todasLasParroquias;
 
-    // Filtro de vicaría
     if (vicariaSeleccionada !== null) {
       lista = lista.filter((p) => p.vicaria === vicariaSeleccionada);
     }
 
-    // Filtro de texto
     if (busqueda.trim()) {
       const termino = busqueda.toLowerCase().trim();
       lista = lista.filter(
@@ -48,13 +47,18 @@ export default function HomePage() {
       );
     }
 
+    if (soloVisitadas) {
+      lista = lista.filter((p) => visitadas.has(p.id));
+    }
+
     return lista;
-  }, [busqueda, vicariaSeleccionada]);
+  }, [busqueda, vicariaSeleccionada, soloVisitadas, visitadas]);
 
   const handleFiltrar = useCallback(
-    (texto: string, vicaria: number | null) => {
+    (texto: string, vicaria: number | null, soloVis: boolean) => {
       setBusqueda(texto);
       setVicariaSeleccionada(vicaria);
+      setSoloVisitadas(soloVis);
     },
     []
   );
@@ -68,11 +72,16 @@ export default function HomePage() {
   return (
     <div className="space-y-4">
       {/* Filtros */}
-      <Filtros onFiltrar={handleFiltrar} />
+      <Filtros
+        onFiltrar={handleFiltrar}
+        totalVisitadas={visitadas.size}
+        onExportar={exportar}
+        onImportar={importar}
+      />
 
       {/* Contador de resultados */}
       <p className="text-sm text-slate-500">
-        {parroquiasFiltradas.length} parroquia
+        {parroquiasFiltradas.length} iglesia
         {parroquiasFiltradas.length !== 1 ? "s" : ""} encontrada
         {parroquiasFiltradas.length !== 1 ? "s" : ""}
       </p>
@@ -84,7 +93,9 @@ export default function HomePage() {
           <ListadoParroquias
             parroquias={parroquiasFiltradas}
             seleccionada={parroquiaSeleccionada}
+            visitadas={visitadas}
             onSeleccionar={handleSeleccionar}
+            onToggleVisitada={toggleVisitada}
           />
         </div>
 
@@ -93,6 +104,7 @@ export default function HomePage() {
           <MapaParroquias
             parroquias={parroquiasFiltradas}
             seleccionada={parroquiaSeleccionada}
+            visitadas={visitadas}
             onSeleccionar={handleSeleccionar}
           />
         </div>
