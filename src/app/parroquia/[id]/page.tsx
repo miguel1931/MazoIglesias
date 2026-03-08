@@ -1,6 +1,7 @@
 import Link from "next/link";
 import parroquiasData from "../../../../public/parroquias.json";
 import type { Parroquia } from "@/types/parroquia";
+import BotonVisitada from "@/components/BotonVisitada";
 
 const todasLasParroquias: Parroquia[] = parroquiasData as Parroquia[];
 
@@ -121,8 +122,8 @@ export default function ParroquiaDetallePage({ params }: PageProps) {
             </p>
           </div>
 
-          {/* Enlace Google Maps */}
-          <div className="pt-2">
+          {/* Acciones */}
+          <div className="flex flex-wrap gap-3 pt-2">
             <a
               href={googleMapsUrl}
               target="_blank"
@@ -131,6 +132,7 @@ export default function ParroquiaDetallePage({ params }: PageProps) {
             >
               🗺️ Cómo llegar
             </a>
+            <BotonVisitada id={parroquia.id} />
           </div>
         </div>
       </div>
