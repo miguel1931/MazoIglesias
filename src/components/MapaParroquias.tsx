@@ -9,6 +9,8 @@ import {
   useMap,
 } from "react-leaflet";
 import MarkerClusterGroup from "react-leaflet-cluster";
+import "react-leaflet-cluster/lib/assets/MarkerCluster.css";
+import "react-leaflet-cluster/lib/assets/MarkerCluster.Default.css";
 import L from "leaflet";
 import Link from "next/link";
 import type { Parroquia } from "@/types/parroquia";
