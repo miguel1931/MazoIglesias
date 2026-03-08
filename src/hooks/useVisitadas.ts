@@ -28,7 +28,7 @@ export function useVisitadas() {
         next.add(id);
       }
       try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify([...next]));
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(Array.from(next)));
       } catch {}
       return next;
     });
@@ -36,7 +36,7 @@ export function useVisitadas() {
 
   const exportar = useCallback(
     (nombreFichero = "iglesias-visitadas.json") => {
-      const data = JSON.stringify([...visitadas], null, 2);
+      const data = JSON.stringify(Array.from(visitadas), null, 2);
       const blob = new Blob([data], { type: "application/json" });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
@@ -56,9 +56,9 @@ export function useVisitadas() {
           const ids = JSON.parse(e.target?.result as string) as string[];
           if (!Array.isArray(ids)) return;
           setVisitadas((prev) => {
-            const merged = new Set([...prev, ...ids]);
+            const merged = new Set(Array.from(prev).concat(ids));
             try {
-              localStorage.setItem(STORAGE_KEY, JSON.stringify([...merged]));
+              localStorage.setItem(STORAGE_KEY, JSON.stringify(Array.from(merged)));
             } catch {}
             return merged;
           });
