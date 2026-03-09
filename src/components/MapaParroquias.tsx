@@ -13,9 +13,9 @@ import Supercluster from "supercluster";
 import Link from "next/link";
 import type { Parroquia } from "@/types/parroquia";
 
-// ─── Estilo de mapa (CartoDB Positron — neutro, sin banderas) ───
+// ─── Estilo de mapa (CartoDB Voyager — colorido, neutro, sin banderas) ───
 const MAP_STYLE =
-  "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json";
+  "https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json";
 
 // ─── Centro de Madrid ───
 const MADRID_CENTER = { longitude: -3.7038, latitude: 40.4168 };
