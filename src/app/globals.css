@@ -9,14 +9,6 @@
   z-index: 1;
 }
 
-/* Ocultar bandera de Leaflet en la atribucion — la fe no se mezcla con politica */
-.leaflet-attribution-flag {
-  display: none !important;
-}
-svg.leaflet-attribution-flag {
-  display: none !important;
-}
-
 /* Asegurar que los popups de Leaflet se vean bien */
 .leaflet-popup-content-wrapper {
   border-radius: 8px !important;
