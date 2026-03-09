@@ -8,7 +8,7 @@ import ListadoParroquias from "@/components/ListadoParroquias";
 import { useVisitadas } from "@/hooks/useVisitadas";
 import dynamic from "next/dynamic";
 
-// Cargamos el mapa solo en el cliente (Leaflet necesita window)
+// Cargamos el mapa solo en el cliente (MapLibre necesita window)
 const MapaParroquias = dynamic(() => import("@/components/MapaParroquias"), {
   ssr: false,
   loading: () => (

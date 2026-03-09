@@ -14,15 +14,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="es">
-      <head>
-        {/* Leaflet CSS */}
-        <link
-          rel="stylesheet"
-          href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-          integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
-          crossOrigin=""
-        />
-      </head>
+      <head />
       <body className="min-h-screen bg-slate-50 text-slate-800 antialiased">
         {/* Cabecera */}
         <header className="bg-gradient-to-r from-amber-700 via-amber-800 to-amber-900 text-white shadow-md">
