@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import BienvenidaModal from "@/components/BienvenidaModal";
 
 export const metadata: Metadata = {
   title: "Parroquias de Madrid",
@@ -16,6 +17,7 @@ export default function RootLayout({
     <html lang="es">
       <head />
       <body className="min-h-screen bg-slate-50 text-slate-800 antialiased">
+        <BienvenidaModal />
         {/* Cabecera */}
         <header className="bg-gradient-to-r from-amber-700 via-amber-800 to-amber-900 text-white shadow-md">
           <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
