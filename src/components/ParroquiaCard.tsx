@@ -20,7 +20,7 @@ export default function ParroquiaCard({
   onToggleVisitada,
   ciudad,
 }: ParroquiaCardProps) {
-  const labelZona = ciudad === "barcelona" ? "Decanato" : "Vicar\u00eda";
+  const labelZona = ciudad === "barcelona" ? "Decanato" : "Vicaria";
   const accentBadge = ciudad === "barcelona"
     ? "bg-blue-100 text-blue-700"
     : "bg-amber-100 text-amber-700";
@@ -52,7 +52,7 @@ export default function ParroquiaCard({
             visitada ? "text-green-500 hover:text-green-700" : "text-slate-300 hover:text-green-400"
           }`}
         >
-          {visitada ? "\u2713" : "\u25cb"}
+          {visitada ? "✓" : "○"}
         </button>
       </div>
       <p className="mt-0.5 text-xs text-slate-500">{parroquia.direccion}</p>
@@ -75,7 +75,7 @@ export default function ParroquiaCard({
           onClick={(e) => e.stopPropagation()}
           className={`text-xs font-medium underline underline-offset-2 transition ${accentLink}`}
         >
-          Ver detalle \u2192
+          Ver detalle →
         </Link>
       </div>
     </div>

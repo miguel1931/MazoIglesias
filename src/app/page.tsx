@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useEffect } from "react";
 import type { Parroquia } from "@/types/parroquia";
 import parroquiasDataMadrid from "../../public/parroquias.json";
 import parroquiasDataBcn from "../../public/parroquias_bcn.json";
@@ -20,6 +20,7 @@ const MapaParroquias = dynamic(() => import("@/components/MapaParroquias"), {
 });
 
 type Ciudad = "madrid" | "barcelona";
+const CIUDAD_KEY = "mazo-iglesias-ciudad";
 
 const todasMadrid: Parroquia[] = parroquiasDataMadrid as Parroquia[];
 const todasBcn: Parroquia[] = parroquiasDataBcn as Parroquia[];
@@ -30,6 +31,16 @@ export default function HomePage() {
   const [vicariaSeleccionada, setVicariaSeleccionada] = useState<number | null>(null);
   const [soloVisitadas, setSoloVisitadas] = useState(false);
   const [parroquiaSeleccionada, setParroquiaSeleccionada] = useState<Parroquia | null>(null);
+
+  // Restore city from localStorage on mount
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(CIUDAD_KEY) as Ciudad | null;
+      if (saved === "barcelona" || saved === "madrid") {
+        setCiudad(saved);
+      }
+    } catch {}
+  }, []);
 
   const { visitadas, toggleVisitada, exportar, importar } = useVisitadas();
 
@@ -71,7 +82,7 @@ export default function HomePage() {
   );
 
   const handleSeleccionar = useCallback((parroquia: Parroquia) => {
-    setParroquiaSeleccionada((prev) =>
+    setParroquiaSeleccionada((prev: Parroquia | null) =>
       prev?.id === parroquia.id ? null : parroquia
     );
   }, []);
@@ -82,40 +93,11 @@ export default function HomePage() {
     setVicariaSeleccionada(null);
     setSoloVisitadas(false);
     setParroquiaSeleccionada(null);
+    try { localStorage.setItem(CIUDAD_KEY, c); } catch {}
   };
 
   return (
     <div className="space-y-4">
-      {/* Selector de ciudad */}
-      <div className="flex gap-2">
-        <button
-          onClick={() => handleCiudad("madrid")}
-          className={`flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold transition-all shadow-sm border ${
-            ciudad === "madrid"
-              ? "bg-amber-700 text-white border-amber-800 shadow-amber-200"
-              : "bg-white text-slate-600 border-slate-200 hover:border-amber-300 hover:text-amber-700"
-          }`}
-        >
-          🏛️ Madrid
-          <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${ciudad === "madrid" ? "bg-amber-600 text-amber-100" : "bg-slate-100 text-slate-500"}`}>
-            {todasMadrid.length}
-          </span>
-        </button>
-        <button
-          onClick={() => handleCiudad("barcelona")}
-          className={`flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold transition-all shadow-sm border ${
-            ciudad === "barcelona"
-              ? "bg-blue-700 text-white border-blue-800 shadow-blue-200"
-              : "bg-white text-slate-600 border-slate-200 hover:border-blue-300 hover:text-blue-700"
-          }`}
-        >
-          ⛪ Barcelona
-          <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${ciudad === "barcelona" ? "bg-blue-600 text-blue-100" : "bg-slate-100 text-slate-500"}`}>
-            {todasBcn.length}
-          </span>
-        </button>
-      </div>
-
       {/* Filtros */}
       <Filtros
         onFiltrar={handleFiltrar}
@@ -156,6 +138,39 @@ export default function HomePage() {
             ciudad={ciudad}
           />
         </div>
+      </div>
+
+      {/* ── Selector de ciudad ── al final, antes del footer */}
+      <div className="mt-6 flex items-center justify-center gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+        <span className="hidden text-xs font-semibold uppercase tracking-wider text-slate-400 sm:block">
+          Cambiar ciudad
+        </span>
+        <button
+          onClick={() => handleCiudad("madrid")}
+          className={`flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold transition-all shadow-sm border ${
+            ciudad === "madrid"
+              ? "bg-amber-700 text-white border-amber-800"
+              : "bg-white text-slate-600 border-slate-200 hover:border-amber-300 hover:text-amber-700"
+          }`}
+        >
+          🏛️ Madrid
+          <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${ciudad === "madrid" ? "bg-amber-600 text-amber-100" : "bg-slate-100 text-slate-500"}`}>
+            {todasMadrid.length}
+          </span>
+        </button>
+        <button
+          onClick={() => handleCiudad("barcelona")}
+          className={`flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold transition-all shadow-sm border ${
+            ciudad === "barcelona"
+              ? "bg-blue-700 text-white border-blue-800"
+              : "bg-white text-slate-600 border-slate-200 hover:border-blue-300 hover:text-blue-700"
+          }`}
+        >
+          ⛪ Barcelona
+          <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${ciudad === "barcelona" ? "bg-blue-600 text-blue-100" : "bg-slate-100 text-slate-500"}`}>
+            {todasBcn.length}
+          </span>
+        </button>
       </div>
     </div>
   );
