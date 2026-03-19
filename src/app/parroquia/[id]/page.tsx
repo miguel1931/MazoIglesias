@@ -3,6 +3,7 @@ import parroquiasData from "../../../../public/parroquias.json";
 import parroquiasBcnData from "../../../../public/parroquias_bcn.json";
 import type { Parroquia } from "@/types/parroquia";
 import BotonVisitada from "@/components/BotonVisitada";
+import FotosIglesia from "@/components/FotosIglesia";
 
 const todasMadrid: Parroquia[] = parroquiasData as Parroquia[];
 const todasBcn: Parroquia[] = parroquiasBcnData as Parroquia[];
@@ -149,6 +150,12 @@ export default function ParroquiaDetallePage({ params }: PageProps) {
             </a>
             <BotonVisitada id={parroquia.id} />
           </div>
+
+          {/* Separador */}
+          <hr className="border-slate-100" />
+
+          {/* Fotos */}
+          <FotosIglesia iglesiaId={parroquia.id} ciudad={esBcn ? "barcelona" : "madrid"} />
         </div>
       </div>
     </div>
