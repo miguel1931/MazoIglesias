@@ -22,7 +22,7 @@ const MADRID_CENTER = { longitude: -3.7038, latitude: 40.4168 };
 const BCN_CENTER = { longitude: 2.1534, latitude: 41.3879 };
 const DEFAULT_ZOOM = 11;
 
-// ─── SVG de marcadores ───
+// ─── SVG de marcadores — Ámbar (Madrid) ───
 const PIN_DEFAULT = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 25 41" width="25" height="41">
   <path fill="#b45309" stroke="#fff" stroke-width="1.5" d="M12.5 0C5.6 0 0 5.6 0 12.5c0 8.9 12.5 28.5 12.5 28.5S25 21.4 25 12.5C25 5.6 19.4 0 12.5 0z"/>
   <circle cx="12.5" cy="12.5" r="5" fill="white"/>
@@ -33,6 +33,18 @@ const PIN_SELECTED = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 49
   <circle cx="15" cy="15" r="6" fill="white"/>
 </svg>`;
 
+// ─── SVG de marcadores — Azul (Barcelona) ───
+const PIN_DEFAULT_BCN = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 25 41" width="25" height="41">
+  <path fill="#1d4ed8" stroke="#fff" stroke-width="1.5" d="M12.5 0C5.6 0 0 5.6 0 12.5c0 8.9 12.5 28.5 12.5 28.5S25 21.4 25 12.5C25 5.6 19.4 0 12.5 0z"/>
+  <circle cx="12.5" cy="12.5" r="5" fill="white"/>
+</svg>`;
+
+const PIN_SELECTED_BCN = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 49" width="30" height="49">
+  <path fill="#1e3a8a" stroke="#fff" stroke-width="2" d="M15 0C6.7 0 0 6.7 0 15c0 10.7 15 34 15 34S30 25.7 30 15C30 6.7 23.3 0 15 0z"/>
+  <circle cx="15" cy="15" r="6" fill="white"/>
+</svg>`;
+
+// ─── SVG de marcadores — Verde (visitadas, ambas ciudades) ───
 const PIN_VISITED = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 25 41" width="25" height="41">
   <path fill="#22c55e" stroke="#fff" stroke-width="1.5" d="M12.5 0C5.6 0 0 5.6 0 12.5c0 8.9 12.5 28.5 12.5 28.5S25 21.4 25 12.5C25 5.6 19.4 0 12.5 0z"/>
   <text x="12.5" y="18" text-anchor="middle" fill="white" font-size="14" font-weight="bold">✓</text>
@@ -144,8 +156,8 @@ export default function MapaParroquias({
     const esSeleccionada = seleccionada?.id === parroquia.id;
     if (esVisitada && esSeleccionada) return PIN_VISITED_SELECTED;
     if (esVisitada) return PIN_VISITED;
-    if (esSeleccionada) return PIN_SELECTED;
-    return PIN_DEFAULT;
+    if (esSeleccionada) return ciudad === "barcelona" ? PIN_SELECTED_BCN : PIN_SELECTED;
+    return ciudad === "barcelona" ? PIN_DEFAULT_BCN : PIN_DEFAULT;
   };
 
   const getPinClass = (parroquia: Parroquia): string => {

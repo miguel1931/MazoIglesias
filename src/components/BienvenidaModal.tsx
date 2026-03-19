@@ -44,7 +44,7 @@ export default function BienvenidaModal() {
               <span className="mt-0.5 text-lg">🗺️</span>
               <div>
                 <p className="font-semibold text-slate-800">Explora el mapa</p>
-                <p className="text-slate-500">Más de 500 parroquias de Madrid (por Vicarías) y ~140 de Barcelona y su área metropolitana (por Decanatos), todas en el mapa.</p>
+                <p className="text-slate-500">Más de 500 parroquias de Madrid organizadas por Vicarías, todas en el mapa interactivo.</p>
               </div>
             </div>
 
