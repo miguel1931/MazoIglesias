@@ -7,20 +7,29 @@ interface FiltrosProps {
   totalVisitadas: number;
   onExportar: () => void;
   onImportar: (file: File) => void;
+  ciudad: "madrid" | "barcelona";
 }
 
-const VICARIAS = [1, 2, 3, 4, 5, 6, 7, 8] as const;
+const VICARIAS_MADRID = [1, 2, 3, 4, 5, 6, 7, 8] as const;
+const DECANATOS_BCN = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as const;
 
 export default function Filtros({
   onFiltrar,
   totalVisitadas,
   onExportar,
   onImportar,
+  ciudad,
 }: FiltrosProps) {
   const [texto, setTexto] = useState("");
   const [vicaria, setVicaria] = useState<number | null>(null);
   const [soloVisitadas, setSoloVisitadas] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const opciones = ciudad === "madrid" ? VICARIAS_MADRID : DECANATOS_BCN;
+  const labelFiltro = ciudad === "madrid" ? "Vicaría" : "Decanato";
+  const accentColor = ciudad === "madrid"
+    ? "focus:border-amber-500 focus:ring-amber-500/30"
+    : "focus:border-blue-500 focus:ring-blue-500/30";
 
   const handleTexto = (valor: string) => {
     setTexto(valor);
@@ -64,7 +73,7 @@ export default function Filtros({
             htmlFor="busqueda"
             className="mb-1 block text-xs font-medium text-slate-500"
           >
-            Buscar parroquia
+            Buscar iglesia
           </label>
           <input
             id="busqueda"
@@ -72,28 +81,28 @@ export default function Filtros({
             placeholder="Nombre, barrio, población o código postal…"
             value={texto}
             onChange={(e) => handleTexto(e.target.value)}
-            className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm shadow-sm transition focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-500/30"
+            className={`w-full rounded-lg border border-slate-300 px-3 py-2 text-sm shadow-sm transition focus:outline-none focus:ring-2 ${accentColor}`}
           />
         </div>
 
-        {/* Filtro por vicaría */}
+        {/* Filtro por vicaría / decanato */}
         <div className="w-full sm:w-48">
           <label
             htmlFor="vicaria"
             className="mb-1 block text-xs font-medium text-slate-500"
           >
-            Vicaría
+            {labelFiltro}
           </label>
           <select
             id="vicaria"
             value={vicaria ?? ""}
             onChange={(e) => handleVicaria(e.target.value)}
-            className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm shadow-sm transition focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-500/30"
+            className={`w-full rounded-lg border border-slate-300 px-3 py-2 text-sm shadow-sm transition focus:outline-none focus:ring-2 ${accentColor}`}
           >
-            <option value="">Todas las vicarías</option>
-            {VICARIAS.map((v) => (
+            <option value="">Todos los {labelFiltro.toLowerCase()}s</option>
+            {opciones.map((v) => (
               <option key={v} value={v}>
-                Vicaría {v}
+                {labelFiltro} {v}
               </option>
             ))}
           </select>

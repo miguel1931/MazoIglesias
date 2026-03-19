@@ -12,6 +12,7 @@ interface ListadoParroquiasProps {
   visitadas: Set<string>;
   onSeleccionar: (parroquia: Parroquia) => void;
   onToggleVisitada: (id: string) => void;
+  ciudad: "madrid" | "barcelona";
 }
 
 export default function ListadoParroquias({
@@ -20,6 +21,7 @@ export default function ListadoParroquias({
   visitadas,
   onSeleccionar,
   onToggleVisitada,
+  ciudad,
 }: ListadoParroquiasProps) {
   const [pagina, setPagina] = useState(1);
 
@@ -52,6 +54,7 @@ export default function ListadoParroquias({
             visitada={visitadas.has(parroquia.id)}
             onSeleccionar={onSeleccionar}
             onToggleVisitada={onToggleVisitada}
+            ciudad={ciudad}
           />
         ))}
       </div>

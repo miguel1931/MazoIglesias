@@ -2,7 +2,8 @@
 
 import { useState, useCallback, useMemo } from "react";
 import type { Parroquia } from "@/types/parroquia";
-import parroquiasData from "../../public/parroquias.json";
+import parroquiasDataMadrid from "../../public/parroquias.json";
+import parroquiasDataBcn from "../../public/parroquias_bcn.json";
 import Filtros from "@/components/Filtros";
 import ListadoParroquias from "@/components/ListadoParroquias";
 import { useVisitadas } from "@/hooks/useVisitadas";
@@ -18,15 +19,21 @@ const MapaParroquias = dynamic(() => import("@/components/MapaParroquias"), {
   ),
 });
 
-const todasLasParroquias: Parroquia[] = parroquiasData as Parroquia[];
+type Ciudad = "madrid" | "barcelona";
+
+const todasMadrid: Parroquia[] = parroquiasDataMadrid as Parroquia[];
+const todasBcn: Parroquia[] = parroquiasDataBcn as Parroquia[];
 
 export default function HomePage() {
+  const [ciudad, setCiudad] = useState<Ciudad>("madrid");
   const [busqueda, setBusqueda] = useState("");
   const [vicariaSeleccionada, setVicariaSeleccionada] = useState<number | null>(null);
   const [soloVisitadas, setSoloVisitadas] = useState(false);
   const [parroquiaSeleccionada, setParroquiaSeleccionada] = useState<Parroquia | null>(null);
 
   const { visitadas, toggleVisitada, exportar, importar } = useVisitadas();
+
+  const todasLasParroquias = ciudad === "madrid" ? todasMadrid : todasBcn;
 
   // Filtrado
   const parroquiasFiltradas = useMemo(() => {
@@ -52,7 +59,7 @@ export default function HomePage() {
     }
 
     return lista;
-  }, [busqueda, vicariaSeleccionada, soloVisitadas, visitadas]);
+  }, [busqueda, vicariaSeleccionada, soloVisitadas, visitadas, todasLasParroquias]);
 
   const handleFiltrar = useCallback(
     (texto: string, vicaria: number | null, soloVis: boolean) => {
@@ -69,14 +76,53 @@ export default function HomePage() {
     );
   }, []);
 
+  const handleCiudad = (c: Ciudad) => {
+    setCiudad(c);
+    setBusqueda("");
+    setVicariaSeleccionada(null);
+    setSoloVisitadas(false);
+    setParroquiaSeleccionada(null);
+  };
+
   return (
     <div className="space-y-4">
+      {/* Selector de ciudad */}
+      <div className="flex gap-2">
+        <button
+          onClick={() => handleCiudad("madrid")}
+          className={`flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold transition-all shadow-sm border ${
+            ciudad === "madrid"
+              ? "bg-amber-700 text-white border-amber-800 shadow-amber-200"
+              : "bg-white text-slate-600 border-slate-200 hover:border-amber-300 hover:text-amber-700"
+          }`}
+        >
+          🏛️ Madrid
+          <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${ciudad === "madrid" ? "bg-amber-600 text-amber-100" : "bg-slate-100 text-slate-500"}`}>
+            {todasMadrid.length}
+          </span>
+        </button>
+        <button
+          onClick={() => handleCiudad("barcelona")}
+          className={`flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold transition-all shadow-sm border ${
+            ciudad === "barcelona"
+              ? "bg-blue-700 text-white border-blue-800 shadow-blue-200"
+              : "bg-white text-slate-600 border-slate-200 hover:border-blue-300 hover:text-blue-700"
+          }`}
+        >
+          ⛪ Barcelona
+          <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${ciudad === "barcelona" ? "bg-blue-600 text-blue-100" : "bg-slate-100 text-slate-500"}`}>
+            {todasBcn.length}
+          </span>
+        </button>
+      </div>
+
       {/* Filtros */}
       <Filtros
         onFiltrar={handleFiltrar}
         totalVisitadas={visitadas.size}
         onExportar={exportar}
         onImportar={importar}
+        ciudad={ciudad}
       />
 
       {/* Contador de resultados */}
@@ -96,6 +142,7 @@ export default function HomePage() {
             visitadas={visitadas}
             onSeleccionar={handleSeleccionar}
             onToggleVisitada={toggleVisitada}
+            ciudad={ciudad}
           />
         </div>
 
@@ -106,6 +153,7 @@ export default function HomePage() {
             seleccionada={parroquiaSeleccionada}
             visitadas={visitadas}
             onSeleccionar={handleSeleccionar}
+            ciudad={ciudad}
           />
         </div>
       </div>

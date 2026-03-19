@@ -17,8 +17,9 @@ import type { Parroquia } from "@/types/parroquia";
 const MAP_STYLE =
   "https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json";
 
-// ─── Centro de Madrid ───
+// ─── Centros de ciudad ───
 const MADRID_CENTER = { longitude: -3.7038, latitude: 40.4168 };
+const BCN_CENTER = { longitude: 2.1534, latitude: 41.3879 };
 const DEFAULT_ZOOM = 11;
 
 // ─── SVG de marcadores ───
@@ -61,6 +62,7 @@ interface MapaParroquiasProps {
   seleccionada: Parroquia | null;
   visitadas: Set<string>;
   onSeleccionar: (parroquia: Parroquia) => void;
+  ciudad: "madrid" | "barcelona";
 }
 
 export default function MapaParroquias({
@@ -68,12 +70,24 @@ export default function MapaParroquias({
   seleccionada,
   visitadas,
   onSeleccionar,
+  ciudad,
 }: MapaParroquiasProps) {
   const mapRef = useRef<MapRef>(null);
   const [viewState, setViewState] = useState({
     ...MADRID_CENTER,
     zoom: DEFAULT_ZOOM,
   });
+
+  // ─── Fly al centro de la ciudad cuando cambia ───
+  useEffect(() => {
+    const center = ciudad === "barcelona" ? BCN_CENTER : MADRID_CENTER;
+    if (mapRef.current) {
+      mapRef.current.flyTo({ center: [center.longitude, center.latitude], zoom: DEFAULT_ZOOM, duration: 900 });
+    } else {
+      setViewState({ ...center, zoom: DEFAULT_ZOOM });
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ciudad]);
   const [popupInfo, setPopupInfo] = useState<Parroquia | null>(null);
 
   // ─── Supercluster para clustering ───
@@ -95,7 +109,9 @@ export default function MapaParroquias({
 
   // ─── Clusters visibles ───
   const clusters = useMemo(() => {
-    const bounds: [number, number, number, number] = [-6, 35, -1, 44]; // España aprox.
+    const bounds: [number, number, number, number] = ciudad === "barcelona"
+      ? [1.0, 41.0, 3.0, 42.0]   // Área de Barcelona
+      : [-6, 35, -1, 44];         // España aprox.
     return supercluster.getClusters(bounds, Math.floor(viewState.zoom));
   }, [supercluster, viewState.zoom]);
 
