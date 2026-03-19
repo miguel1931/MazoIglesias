@@ -2,11 +2,13 @@
 
 import Link from "next/link";
 import type { Parroquia } from "@/types/parroquia";
+import { COLORES, type ColorEtiqueta } from "@/hooks/useColores";
 
 interface ParroquiaCardProps {
   parroquia: Parroquia;
   seleccionada: boolean;
   visitada: boolean;
+  color: ColorEtiqueta;
   onSeleccionar: (parroquia: Parroquia) => void;
   onToggleVisitada: (id: string) => void;
   ciudad: "madrid" | "barcelona";
@@ -16,6 +18,7 @@ export default function ParroquiaCard({
   parroquia,
   seleccionada,
   visitada,
+  color,
   onSeleccionar,
   onToggleVisitada,
   ciudad,
@@ -34,6 +37,8 @@ export default function ParroquiaCard({
     ? "border-slate-200 bg-white hover:border-blue-300 hover:bg-blue-50/50 hover:shadow-sm"
     : "border-slate-200 bg-white hover:border-amber-300 hover:bg-amber-50/50 hover:shadow-sm";
 
+  const colorDef = color ? COLORES.find((c) => c.id === color) : null;
+
   return (
     <div
       onClick={() => onSeleccionar(parroquia)}
@@ -45,15 +50,24 @@ export default function ParroquiaCard({
         <h3 className="text-sm font-semibold text-slate-800">
           {parroquia.nombre}
         </h3>
-        <button
-          onClick={(e) => { e.stopPropagation(); onToggleVisitada(parroquia.id); }}
-          title={visitada ? "Quitar de visitadas" : "Marcar como visitada"}
-          className={`shrink-0 rounded-full px-1 text-lg leading-none transition-colors ${
-            visitada ? "text-green-500 hover:text-green-700" : "text-slate-300 hover:text-green-400"
-          }`}
-        >
-          {visitada ? "✓" : "○"}
-        </button>
+        <div className="flex shrink-0 items-center gap-1.5">
+          {/* Punto de color */}
+          {colorDef && (
+            <span
+              title={`Etiqueta: ${colorDef.label}`}
+              className={`h-3 w-3 rounded-full shrink-0 ${colorDef.bg}`}
+            />
+          )}
+          <button
+            onClick={(e: React.MouseEvent) => { e.stopPropagation(); onToggleVisitada(parroquia.id); }}
+            title={visitada ? "Quitar de visitadas" : "Marcar como visitada"}
+            className={`rounded-full px-1 text-lg leading-none transition-colors ${
+              visitada ? "text-green-500 hover:text-green-700" : "text-slate-300 hover:text-green-400"
+            }`}
+          >
+            {visitada ? "✓" : "○"}
+          </button>
+        </div>
       </div>
       <p className="mt-0.5 text-xs text-slate-500">{parroquia.direccion}</p>
       <div className="mt-2 flex flex-wrap items-center gap-2">
@@ -72,7 +86,7 @@ export default function ParroquiaCard({
       <div className="mt-2 flex justify-end">
         <Link
           href={`/parroquia/${parroquia.id}`}
-          onClick={(e) => e.stopPropagation()}
+          onClick={(e: React.MouseEvent) => e.stopPropagation()}
           className={`text-xs font-medium underline underline-offset-2 transition ${accentLink}`}
         >
           Ver detalle →

@@ -4,6 +4,7 @@ import parroquiasBcnData from "../../../../public/parroquias_bcn.json";
 import type { Parroquia } from "@/types/parroquia";
 import BotonVisitada from "@/components/BotonVisitada";
 import FotosIglesia from "@/components/FotosIglesia";
+import ColorPickerIglesia from "@/components/ColorPickerIglesia";
 
 const todasMadrid: Parroquia[] = parroquiasData as Parroquia[];
 const todasBcn: Parroquia[] = parroquiasBcnData as Parroquia[];
@@ -150,6 +151,12 @@ export default function ParroquiaDetallePage({ params }: PageProps) {
             </a>
             <BotonVisitada id={parroquia.id} />
           </div>
+
+          {/* Separador */}
+          <hr className="border-slate-100" />
+
+          {/* Etiqueta de color */}
+          <ColorPickerIglesia iglesiaId={parroquia.id} />
 
           {/* Separador */}
           <hr className="border-slate-100" />

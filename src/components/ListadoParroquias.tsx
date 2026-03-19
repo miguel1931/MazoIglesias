@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import type { Parroquia } from "@/types/parroquia";
 import ParroquiaCard from "./ParroquiaCard";
+import { useColores } from "@/hooks/useColores";
 
 const POR_PAGINA = 20;
 
@@ -24,6 +25,7 @@ export default function ListadoParroquias({
   ciudad,
 }: ListadoParroquiasProps) {
   const [pagina, setPagina] = useState(1);
+  const { getColor } = useColores();
 
   // Resetear a página 1 cuando cambie la lista filtrada
   useEffect(() => {
@@ -52,6 +54,7 @@ export default function ListadoParroquias({
             parroquia={parroquia}
             seleccionada={seleccionada?.id === parroquia.id}
             visitada={visitadas.has(parroquia.id)}
+            color={getColor(parroquia.id)}
             onSeleccionar={onSeleccionar}
             onToggleVisitada={onToggleVisitada}
             ciudad={ciudad}
