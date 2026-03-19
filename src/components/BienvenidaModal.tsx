@@ -35,7 +35,7 @@ export default function BienvenidaModal() {
         <div className="space-y-5 px-8 py-6 text-sm text-slate-700">
 
           <p className="text-base leading-relaxed">
-            Esta app nació de una idea sencilla: <strong>recorrer todas las iglesias de Madrid y Barcelona</strong> y llevar un registro de cuáles has visitado.
+            Esta app nació de una idea sencilla: <strong>recorrer todas las iglesias de Madrid</strong> y llevar un registro de cuáles has visitado.
           </p>
 
           <div className="space-y-3">
