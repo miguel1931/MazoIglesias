@@ -28,7 +28,7 @@ export default function ColorPickerIglesia({ iglesiaId }: ColorPickerIglesiaProp
               }`}
             >
               {activo && (
-                <span className={`text-xs font-bold ${c.id === "blanco" || c.id === "blanco" ? "text-slate-600" : "text-white"}`}>
+                <span className={`text-xs font-bold ${c.id === "blanco" ? "text-slate-600" : "text-white"}`}>
                   ✓
                 </span>
               )}
