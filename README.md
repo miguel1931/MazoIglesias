@@ -62,4 +62,5 @@ El fichero `public/parroquias.json` contiene 25 parroquias de ejemplo con datos 
 
 ---
 
-*Forjado en la Forja Nova* 🔥
+*Forjado en la [Forja Nova](https://forjanova.fit)* 🔥  
+**FOC I FERRO, CARN I CODI**

@@ -36,8 +36,22 @@ export default function RootLayout({
         </main>
 
         {/* Pie de página */}
-        <footer className="border-t border-slate-200 bg-white py-4 text-center text-xs text-slate-400">
-          MazoIglesias — Forjado en la Forja Nova 🔥
+        <footer className="border-t border-slate-200 bg-white py-6 text-center text-[10px] text-slate-400">
+          <p>
+            MazoIglesias — Forjado en la{" "}
+            <a
+              href="https://forjanova.fit"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-medium text-slate-500 hover:text-slate-800 hover:underline"
+            >
+              Forja Nova
+            </a>{" "}
+            🔥
+          </p>
+          <p className="mt-1.5 font-bold tracking-[0.2em] text-slate-500">
+            FOC I FERRO, CARN I CODI
+          </p>
         </footer>
       </body>
     </html>
