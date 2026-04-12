@@ -165,29 +165,68 @@ export function useVisitadas() {
       try {
         const datos = await construirDatos(visitadas, conFotos);
         const json = JSON.stringify(datos, null, 2);
-        const file = new File([json], generarNombreFichero(), {
-          type: "application/json",
-        });
+        const nombre = generarNombreFichero();
 
-        if (navigator.share && navigator.canShare?.({ files: [file] })) {
-          await navigator.share({
-            title: "Mi progreso en MazoIglesias",
-            text: `¡Llevo ${datos.visitadas.length} iglesias visitadas! 🏛️⛪`,
-            files: [file],
-          });
-        } else {
-          // Fallback: descargar
-          const blob = new Blob([json], { type: "application/json" });
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement("a");
-          a.href = url;
-          a.download = generarNombreFichero();
-          a.click();
-          URL.revokeObjectURL(url);
+        // 1) Intentar compartir con fichero adjunto (móvil)
+        if (typeof navigator.share === "function") {
+          const file = new File([json], nombre, { type: "application/json" });
+
+          let puedeCompartirArchivo = false;
+          try {
+            puedeCompartirArchivo =
+              typeof navigator.canShare === "function" &&
+              navigator.canShare({ files: [file] });
+          } catch {
+            // canShare puede lanzar en algunos navegadores
+          }
+
+          if (puedeCompartirArchivo) {
+            await navigator.share({
+              title: "Mi progreso en MazoIglesias",
+              text: `¡Llevo ${datos.visitadas.length} iglesias visitadas! 🏛️⛪`,
+              files: [file],
+            });
+            return;
+          }
+
+          // 2) Fallback: compartir solo texto (sin fichero)
+          try {
+            await navigator.share({
+              title: "Mi progreso en MazoIglesias",
+              text: `¡Llevo ${datos.visitadas.length} iglesias visitadas en MazoIglesias! 🏛️⛪`,
+            });
+            return;
+          } catch {
+            // Si también falla, caemos al fallback de descarga
+          }
         }
+
+        // 3) Fallback final: descargar el fichero
+        const blob = new Blob([json], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = nombre;
+        a.click();
+        URL.revokeObjectURL(url);
       } catch (err: any) {
+        // AbortError = el usuario canceló el diálogo de compartir
         if (err?.name !== "AbortError") {
-          alert("Error al compartir.");
+          console.error("Error al compartir:", err);
+          // Fallback de emergencia: descargar
+          try {
+            const datos = await construirDatos(visitadas, conFotos);
+            const json = JSON.stringify(datos, null, 2);
+            const blob = new Blob([json], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = generarNombreFichero();
+            a.click();
+            URL.revokeObjectURL(url);
+          } catch {
+            alert("No se pudo compartir. Prueba con Exportar ↓ en su lugar.");
+          }
         }
       }
     },
