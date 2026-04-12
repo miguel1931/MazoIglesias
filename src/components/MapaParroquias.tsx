@@ -90,6 +90,27 @@ export default function MapaParroquias({
     zoom: DEFAULT_ZOOM,
   });
 
+  // ─── Geolocalización del jugador ───
+  const [userPos, setUserPos] = useState<{ lng: number; lat: number } | null>(null);
+
+  useEffect(() => {
+    if (!navigator.geolocation) return;
+    const watchId = navigator.geolocation.watchPosition(
+      (pos) => {
+        setUserPos({ lng: pos.coords.longitude, lat: pos.coords.latitude });
+      },
+      () => { /* permiso denegado o error, no pasa nada */ },
+      { enableHighAccuracy: true, maximumAge: 10000, timeout: 15000 }
+    );
+    return () => navigator.geolocation.clearWatch(watchId);
+  }, []);
+
+  const flyToUser = useCallback(() => {
+    if (userPos && mapRef.current) {
+      mapRef.current.flyTo({ center: [userPos.lng, userPos.lat], zoom: 15, duration: 800 });
+    }
+  }, [userPos]);
+
   // ─── Fly al centro de la ciudad cuando cambia ───
   useEffect(() => {
     const center = ciudad === "barcelona" ? BCN_CENTER : MADRID_CENTER;
@@ -170,7 +191,17 @@ export default function MapaParroquias({
   };
 
   return (
-    <div className="overflow-hidden rounded-xl border border-slate-200 shadow-sm">
+    <div className="relative overflow-hidden rounded-xl border border-slate-200 shadow-sm">
+      {/* Botón centrar en mi ubicación */}
+      {userPos && (
+        <button
+          onClick={flyToUser}
+          title="Ir a mi ubicación"
+          className="absolute left-2 top-2 z-10 flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-white shadow-md transition hover:bg-slate-50 active:bg-slate-100"
+        >
+          📍
+        </button>
+      )}
       <div className="h-[60vh] lg:h-[80vh]">
         <Map
           ref={mapRef}
@@ -181,6 +212,13 @@ export default function MapaParroquias({
           style={{ width: "100%", height: "100%" }}
         >
           <NavigationControl position="top-right" />
+
+          {/* Ubicación del jugador */}
+          {userPos && (
+            <Marker longitude={userPos.lng} latitude={userPos.lat} anchor="center">
+              <div className="user-location-dot" title="Tu ubicación" />
+            </Marker>
+          )}
 
           {clusters.map((feature) => {
             const [lng, lat] = feature.geometry.coordinates;
