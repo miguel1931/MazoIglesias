@@ -91,7 +91,13 @@ export function useVisitadas() {
 
   // ── Exportar: visitadas + colores + fotos (con imágenes en base64) ──────────
   const exportar = useCallback(
-    async (nombreFichero = "mazo-iglesias-backup.json") => {
+    async () => {
+      const hoy = new Date();
+      const dd = String(hoy.getDate()).padStart(2, "0");
+      const mm = String(hoy.getMonth() + 1).padStart(2, "0");
+      const yyyy = hoy.getFullYear();
+      const nombreFichero = `mazo_iglesias_export_${dd}_${mm}_${yyyy}.json`;
+
       try {
         // 1. Visitadas
         const listaVisitadas = Array.from(visitadas);
