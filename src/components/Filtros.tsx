@@ -5,7 +5,8 @@ import { useRef, useState } from "react";
 interface FiltrosProps {
   onFiltrar: (texto: string, vicaria: number | null, soloVisitadas: boolean) => void;
   totalVisitadas: number;
-  onExportar: () => void | Promise<void>;
+  onExportar: (conFotos?: boolean) => void | Promise<void>;
+  onCompartir: (conFotos?: boolean) => void | Promise<void>;
   onImportar: (file: File) => void;
   ciudad: "madrid" | "barcelona";
 }
@@ -17,6 +18,7 @@ export default function Filtros({
   onFiltrar,
   totalVisitadas,
   onExportar,
+  onCompartir,
   onImportar,
   ciudad,
 }: FiltrosProps) {
@@ -24,12 +26,15 @@ export default function Filtros({
   const [vicaria, setVicaria] = useState<number | null>(null);
   const [soloVisitadas, setSoloVisitadas] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [menuExportar, setMenuExportar] = useState(false);
+  const [menuCompartir, setMenuCompartir] = useState(false);
 
   const opciones = ciudad === "madrid" ? VICARIAS_MADRID : DECANATOS_BCN;
   const labelFiltro = ciudad === "madrid" ? "Vicaría" : "Decanato";
-  const accentColor = ciudad === "madrid"
-    ? "focus:border-amber-500 focus:ring-amber-500/30"
-    : "focus:border-blue-500 focus:ring-blue-500/30";
+  const accentColor =
+    ciudad === "madrid"
+      ? "focus:border-amber-500 focus:ring-amber-500/30"
+      : "focus:border-blue-500 focus:ring-blue-500/30";
 
   const handleTexto = (valor: string) => {
     setTexto(valor);
@@ -117,7 +122,7 @@ export default function Filtros({
         </button>
       </div>
 
-      {/* Segunda fila: visitadas */}
+      {/* Segunda fila: visitadas + acciones */}
       <div className="flex flex-wrap items-center gap-3 border-t border-slate-100 pt-3">
         {/* Checkbox solo visitadas */}
         <label className="flex cursor-pointer items-center gap-2 text-sm text-slate-600">
@@ -136,15 +141,103 @@ export default function Filtros({
         </label>
 
         <div className="ml-auto flex items-center gap-2">
-          {/* Exportar */}
-          <button
-            onClick={onExportar}
-            disabled={totalVisitadas === 0}
-            title="Exportar visitadas como JSON"
-            className="rounded-lg border border-green-200 bg-green-50 px-3 py-1.5 text-xs font-medium text-green-700 transition hover:bg-green-100 disabled:opacity-40"
-          >
-            Exportar ↓
-          </button>
+          {/* Compartir (con menú desplegable) */}
+          <div className="relative">
+            <button
+              onClick={() => {
+                setMenuCompartir(!menuCompartir);
+                setMenuExportar(false);
+              }}
+              disabled={totalVisitadas === 0}
+              title="Compartir con amigos"
+              className="rounded-lg border border-indigo-200 bg-indigo-50 px-3 py-1.5 text-xs font-medium text-indigo-700 transition hover:bg-indigo-100 disabled:opacity-40"
+            >
+              📤 Compartir
+            </button>
+            {menuCompartir && (
+              <div className="absolute right-0 top-full z-20 mt-1 w-52 overflow-hidden rounded-lg border border-slate-200 bg-white shadow-lg">
+                <button
+                  onClick={() => {
+                    onCompartir(false);
+                    setMenuCompartir(false);
+                  }}
+                  className="flex w-full items-center gap-2 px-3 py-2.5 text-left text-xs text-slate-700 transition hover:bg-slate-50"
+                >
+                  <span>🪶</span>
+                  <div>
+                    <p className="font-medium">Ligero (sin fotos)</p>
+                    <p className="text-[10px] text-slate-400">
+                      Ideal para WhatsApp
+                    </p>
+                  </div>
+                </button>
+                <button
+                  onClick={() => {
+                    onCompartir(true);
+                    setMenuCompartir(false);
+                  }}
+                  className="flex w-full items-center gap-2 border-t border-slate-100 px-3 py-2.5 text-left text-xs text-slate-700 transition hover:bg-slate-50"
+                >
+                  <span>📷</span>
+                  <div>
+                    <p className="font-medium">Completo (con fotos)</p>
+                    <p className="text-[10px] text-slate-400">
+                      Más pesado, incluye imágenes
+                    </p>
+                  </div>
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* Exportar (con menú desplegable) */}
+          <div className="relative">
+            <button
+              onClick={() => {
+                setMenuExportar(!menuExportar);
+                setMenuCompartir(false);
+              }}
+              disabled={totalVisitadas === 0}
+              title="Exportar como JSON"
+              className="rounded-lg border border-green-200 bg-green-50 px-3 py-1.5 text-xs font-medium text-green-700 transition hover:bg-green-100 disabled:opacity-40"
+            >
+              Exportar ↓
+            </button>
+            {menuExportar && (
+              <div className="absolute right-0 top-full z-20 mt-1 w-52 overflow-hidden rounded-lg border border-slate-200 bg-white shadow-lg">
+                <button
+                  onClick={() => {
+                    onExportar(false);
+                    setMenuExportar(false);
+                  }}
+                  className="flex w-full items-center gap-2 px-3 py-2.5 text-left text-xs text-slate-700 transition hover:bg-slate-50"
+                >
+                  <span>🪶</span>
+                  <div>
+                    <p className="font-medium">Sin fotos</p>
+                    <p className="text-[10px] text-slate-400">
+                      Fichero pequeño
+                    </p>
+                  </div>
+                </button>
+                <button
+                  onClick={() => {
+                    onExportar(true);
+                    setMenuExportar(false);
+                  }}
+                  className="flex w-full items-center gap-2 border-t border-slate-100 px-3 py-2.5 text-left text-xs text-slate-700 transition hover:bg-slate-50"
+                >
+                  <span>📷</span>
+                  <div>
+                    <p className="font-medium">Con fotos</p>
+                    <p className="text-[10px] text-slate-400">
+                      Backup completo
+                    </p>
+                  </div>
+                </button>
+              </div>
+            )}
+          </div>
 
           {/* Importar */}
           <button

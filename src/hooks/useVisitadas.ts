@@ -4,11 +4,12 @@ import { useState, useEffect, useCallback } from "react";
 
 const STORAGE_KEY = "iglesias-visitadas";
 const COLORES_KEY = "mazo-iglesias-colores";
+const JUGADOR_KEY = "mazo-iglesias-jugador";
 const DB_NAME = "mazo-iglesias-fotos";
 const STORE = "fotos";
 const DB_V = 1;
 
-// ─── IndexedDB helpers (duplicados mínimos para no acoplar hooks) ─────────────
+// ─── IndexedDB helpers ────────────────────────────────────────────────────────
 function abrirDB(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
     const req = indexedDB.open(DB_NAME, DB_V);
@@ -42,46 +43,95 @@ function base64ToBlob(dataUrl: string): Blob {
   return new Blob([bytes], { type: mime });
 }
 
+function generarNombreFichero(): string {
+  const hoy = new Date();
+  const dd = String(hoy.getDate()).padStart(2, "0");
+  const mm = String(hoy.getMonth() + 1).padStart(2, "0");
+  const yyyy = hoy.getFullYear();
+  return `mazo_iglesias_export_${dd}_${mm}_${yyyy}.json`;
+}
+
 // ─── Tipos del fichero exportado ──────────────────────────────────────────────
 interface FotoExportada {
   iglesiaId: string;
   nombre: string;
   tamano: number;
   fecha: number;
-  dataUrl: string; // base64 de la imagen
+  dataUrl: string;
 }
 
 interface DatosExportados {
-  version: 2;
+  version: 3;
+  jugador: string;
   exportadoEn: string;
   visitadas: string[];
   colores: Record<string, string | null>;
   fotos: FotoExportada[];
 }
 
+// ─── Construir los datos exportables ──────────────────────────────────────────
+async function construirDatos(
+  visitadas: Set<string>,
+  conFotos: boolean
+): Promise<DatosExportados> {
+  const jugador = localStorage.getItem(JUGADOR_KEY) || "Anónimo";
+  const listaVisitadas = Array.from(visitadas);
+
+  let colores: Record<string, string | null> = {};
+  try {
+    colores = JSON.parse(localStorage.getItem(COLORES_KEY) || "{}");
+  } catch {}
+
+  const fotos: FotoExportada[] = [];
+  if (conFotos) {
+    try {
+      const db = await abrirDB();
+      const allFotos = await new Promise<any[]>((resolve) => {
+        const tx = db.transaction(STORE, "readonly");
+        const req = tx.objectStore(STORE).getAll();
+        req.onsuccess = () => resolve(req.result);
+      });
+      for (const foto of allFotos) {
+        const dataUrl = await blobToBase64(foto.blob);
+        fotos.push({
+          iglesiaId: foto.iglesiaId,
+          nombre: foto.nombre,
+          tamano: foto.tamano,
+          fecha: foto.fecha,
+          dataUrl,
+        });
+      }
+    } catch {}
+  }
+
+  return {
+    version: 3,
+    jugador,
+    exportadoEn: new Date().toISOString(),
+    visitadas: listaVisitadas,
+    colores,
+    fotos,
+  };
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
 export function useVisitadas() {
   const [visitadas, setVisitadas] = useState<Set<string>>(new Set());
 
-  // Cargar desde localStorage al montar
   useEffect(() => {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored) {
         setVisitadas(new Set(JSON.parse(stored) as string[]));
       }
-    } catch {
-      // localStorage no disponible o JSON inválido
-    }
+    } catch {}
   }, []);
 
   const toggleVisitada = useCallback((id: string) => {
     setVisitadas((prev) => {
       const next = new Set(prev);
-      if (next.has(id)) {
-        next.delete(id);
-      } else {
-        next.add(id);
-      }
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
       try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(Array.from(next)));
       } catch {}
@@ -89,63 +139,17 @@ export function useVisitadas() {
     });
   }, []);
 
-  // ── Exportar: visitadas + colores + fotos (con imágenes en base64) ──────────
+  // ── Exportar (descarga fichero) ─────────────────────────────────────────────
   const exportar = useCallback(
-    async () => {
-      const hoy = new Date();
-      const dd = String(hoy.getDate()).padStart(2, "0");
-      const mm = String(hoy.getMonth() + 1).padStart(2, "0");
-      const yyyy = hoy.getFullYear();
-      const nombreFichero = `mazo_iglesias_export_${dd}_${mm}_${yyyy}.json`;
-
+    async (conFotos = true) => {
       try {
-        // 1. Visitadas
-        const listaVisitadas = Array.from(visitadas);
-
-        // 2. Colores
-        let colores: Record<string, string | null> = {};
-        try {
-          colores = JSON.parse(localStorage.getItem(COLORES_KEY) || "{}");
-        } catch {}
-
-        // 3. Fotos desde IndexedDB → base64
-        const fotos: FotoExportada[] = [];
-        try {
-          const db = await abrirDB();
-          const allFotos = await new Promise<any[]>((resolve) => {
-            const tx = db.transaction(STORE, "readonly");
-            const req = tx.objectStore(STORE).getAll();
-            req.onsuccess = () => resolve(req.result);
-          });
-
-          for (const foto of allFotos) {
-            const dataUrl = await blobToBase64(foto.blob);
-            fotos.push({
-              iglesiaId: foto.iglesiaId,
-              nombre: foto.nombre,
-              tamano: foto.tamano,
-              fecha: foto.fecha,
-              dataUrl,
-            });
-          }
-        } catch {
-          // Si falla IndexedDB, exportamos sin fotos
-        }
-
-        const datos: DatosExportados = {
-          version: 2,
-          exportadoEn: new Date().toISOString(),
-          visitadas: listaVisitadas,
-          colores,
-          fotos,
-        };
-
+        const datos = await construirDatos(visitadas, conFotos);
         const json = JSON.stringify(datos, null, 2);
         const blob = new Blob([json], { type: "application/json" });
         const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
-        a.download = nombreFichero;
+        a.download = generarNombreFichero();
         a.click();
         URL.revokeObjectURL(url);
       } catch {
@@ -155,101 +159,134 @@ export function useVisitadas() {
     [visitadas]
   );
 
-  // ── Importar: soporta el formato antiguo (solo array) y el nuevo v2 ─────────
-  const importar = useCallback(
-    (file: File) => {
-      const reader = new FileReader();
-      reader.onload = async (e) => {
-        try {
-          const raw = JSON.parse(e.target?.result as string);
+  // ── Compartir (Web Share API → WhatsApp, email, etc.) ───────────────────────
+  const compartir = useCallback(
+    async (conFotos = false) => {
+      try {
+        const datos = await construirDatos(visitadas, conFotos);
+        const json = JSON.stringify(datos, null, 2);
+        const file = new File([json], generarNombreFichero(), {
+          type: "application/json",
+        });
 
-          // ── Formato antiguo (v1): solo un array de IDs ──
-          if (Array.isArray(raw)) {
-            setVisitadas((prev) => {
-              const merged = new Set(Array.from(prev).concat(raw));
-              try {
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(Array.from(merged)));
-              } catch {}
-              return merged;
-            });
-            return;
-          }
-
-          // ── Formato nuevo (v2): objeto con visitadas, colores, fotos ──
-          const datos = raw as DatosExportados;
-
-          // 1. Visitadas
-          if (Array.isArray(datos.visitadas)) {
-            setVisitadas((prev) => {
-              const merged = new Set(Array.from(prev).concat(datos.visitadas));
-              try {
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(Array.from(merged)));
-              } catch {}
-              return merged;
-            });
-          }
-
-          // 2. Colores (merge)
-          if (datos.colores && typeof datos.colores === "object") {
-            try {
-              const existentes = JSON.parse(localStorage.getItem(COLORES_KEY) || "{}");
-              const merged = { ...existentes, ...datos.colores };
-              localStorage.setItem(COLORES_KEY, JSON.stringify(merged));
-            } catch {}
-          }
-
-          // 3. Fotos → IndexedDB
-          if (Array.isArray(datos.fotos) && datos.fotos.length > 0) {
-            try {
-              const db = await abrirDB();
-
-              // Obtener iglesiaIds que ya tienen fotos para evitar duplicados
-              const existentes = await new Promise<any[]>((resolve) => {
-                const tx = db.transaction(STORE, "readonly");
-                const req = tx.objectStore(STORE).getAll();
-                req.onsuccess = () => resolve(req.result);
-              });
-
-              const existenteSet = new Set(
-                existentes.map((f: any) => `${f.iglesiaId}::${f.nombre}::${f.fecha}`)
-              );
-
-              const tx = db.transaction(STORE, "readwrite");
-              const store = tx.objectStore(STORE);
-
-              for (const foto of datos.fotos) {
-                const clave = `${foto.iglesiaId}::${foto.nombre}::${foto.fecha}`;
-                if (existenteSet.has(clave)) continue; // saltar duplicados
-
-                const blob = base64ToBlob(foto.dataUrl);
-                store.add({
-                  iglesiaId: foto.iglesiaId,
-                  nombre: foto.nombre,
-                  tamano: foto.tamano,
-                  fecha: foto.fecha,
-                  blob,
-                });
-              }
-
-              await new Promise<void>((resolve) => {
-                tx.oncomplete = () => resolve();
-              });
-            } catch {
-              // Si falla la importación de fotos, no romper el flujo
-            }
-          }
-
-          alert(
-            `Importación completada:\n• ${datos.visitadas?.length ?? 0} iglesias visitadas\n• ${Object.keys(datos.colores ?? {}).length} etiquetas de color\n• ${datos.fotos?.length ?? 0} fotos`
-          );
-        } catch {
-          alert("Fichero JSON no válido.");
+        if (navigator.share && navigator.canShare?.({ files: [file] })) {
+          await navigator.share({
+            title: "Mi progreso en MazoIglesias",
+            text: `¡Llevo ${datos.visitadas.length} iglesias visitadas! 🏛️⛪`,
+            files: [file],
+          });
+        } else {
+          // Fallback: descargar
+          const blob = new Blob([json], { type: "application/json" });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = generarNombreFichero();
+          a.click();
+          URL.revokeObjectURL(url);
         }
-      };
-      reader.readAsText(file);
+      } catch (err: any) {
+        if (err?.name !== "AbortError") {
+          alert("Error al compartir.");
+        }
+      }
     },
-    []
+    [visitadas]
   );
 
-  return { visitadas, toggleVisitada, exportar, importar };
+  // ── Importar (retrocompatible con v1, v2 y v3) ─────────────────────────────
+  const importar = useCallback((file: File) => {
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      try {
+        const raw = JSON.parse(e.target?.result as string);
+
+        // ── Formato v1: solo array ──
+        if (Array.isArray(raw)) {
+          setVisitadas((prev) => {
+            const merged = new Set(Array.from(prev).concat(raw));
+            try {
+              localStorage.setItem(
+                STORAGE_KEY,
+                JSON.stringify(Array.from(merged))
+              );
+            } catch {}
+            return merged;
+          });
+          return;
+        }
+
+        // ── Formato v2/v3: objeto ──
+        const datos = raw as DatosExportados;
+
+        // 1. Visitadas
+        if (Array.isArray(datos.visitadas)) {
+          setVisitadas((prev) => {
+            const merged = new Set(Array.from(prev).concat(datos.visitadas));
+            try {
+              localStorage.setItem(
+                STORAGE_KEY,
+                JSON.stringify(Array.from(merged))
+              );
+            } catch {}
+            return merged;
+          });
+        }
+
+        // 2. Colores (merge)
+        if (datos.colores && typeof datos.colores === "object") {
+          try {
+            const existentes = JSON.parse(
+              localStorage.getItem(COLORES_KEY) || "{}"
+            );
+            const merged = { ...existentes, ...datos.colores };
+            localStorage.setItem(COLORES_KEY, JSON.stringify(merged));
+          } catch {}
+        }
+
+        // 3. Fotos → IndexedDB
+        if (Array.isArray(datos.fotos) && datos.fotos.length > 0) {
+          try {
+            const db = await abrirDB();
+            const existentes = await new Promise<any[]>((resolve) => {
+              const tx = db.transaction(STORE, "readonly");
+              const req = tx.objectStore(STORE).getAll();
+              req.onsuccess = () => resolve(req.result);
+            });
+            const existenteSet = new Set(
+              existentes.map(
+                (f: any) => `${f.iglesiaId}::${f.nombre}::${f.fecha}`
+              )
+            );
+            const tx = db.transaction(STORE, "readwrite");
+            const store = tx.objectStore(STORE);
+            for (const foto of datos.fotos) {
+              const clave = `${foto.iglesiaId}::${foto.nombre}::${foto.fecha}`;
+              if (existenteSet.has(clave)) continue;
+              const blob = base64ToBlob(foto.dataUrl);
+              store.add({
+                iglesiaId: foto.iglesiaId,
+                nombre: foto.nombre,
+                tamano: foto.tamano,
+                fecha: foto.fecha,
+                blob,
+              });
+            }
+            await new Promise<void>((resolve) => {
+              tx.oncomplete = () => resolve();
+            });
+          } catch {}
+        }
+
+        alert(
+          `Importación completada:\n• ${datos.visitadas?.length ?? 0} iglesias visitadas\n• ${Object.keys(datos.colores ?? {}).length} etiquetas de color\n• ${datos.fotos?.length ?? 0} fotos`
+        );
+      } catch {
+        alert("Fichero JSON no válido.");
+      }
+    };
+    reader.readAsText(file);
+  }, []);
+
+  return { visitadas, toggleVisitada, exportar, compartir, importar };
 }
