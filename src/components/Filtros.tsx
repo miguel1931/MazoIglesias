@@ -5,7 +5,7 @@ import { useRef, useState } from "react";
 interface FiltrosProps {
   onFiltrar: (texto: string, vicaria: number | null, soloVisitadas: boolean) => void;
   totalVisitadas: number;
-  onExportar: () => void;
+  onExportar: () => void | Promise<void>;
   onImportar: (file: File) => void;
   ciudad: "madrid" | "barcelona";
 }
