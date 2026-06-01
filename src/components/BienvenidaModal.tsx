@@ -21,18 +21,22 @@ export default function BienvenidaModal() {
   if (!visible) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
-      <div className="relative w-full max-w-lg overflow-hidden rounded-2xl bg-white shadow-2xl">
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 p-0 backdrop-blur-sm sm:items-center sm:p-4">
+      <div className="relative w-full max-w-lg overflow-hidden rounded-t-2xl bg-white shadow-2xl sm:rounded-2xl">
+        {/* Handle visual en móvil */}
+        <div className="flex justify-center pt-3 sm:hidden">
+          <div className="h-1 w-10 rounded-full bg-slate-200" />
+        </div>
 
         {/* Cabecera degradada */}
-        <div className="bg-gradient-to-br from-amber-700 via-amber-800 to-amber-900 px-8 py-7 text-white">
-          <div className="mb-1 text-3xl">⛪</div>
-          <h2 className="text-2xl font-bold tracking-tight">Mazo Iglesias</h2>
+        <div className="bg-gradient-to-br from-amber-700 via-amber-800 to-amber-900 px-5 py-5 text-white sm:px-8 sm:py-7">
+          <div className="mb-1 text-2xl sm:text-3xl">⛪</div>
+          <h2 className="text-xl font-bold tracking-tight sm:text-2xl">Mazo Iglesias</h2>
           <p className="mt-1 text-sm text-amber-200">Tu diario personal de parroquias</p>
         </div>
 
-        {/* Contenido */}
-        <div className="space-y-5 px-8 py-6 text-sm text-slate-700">
+        {/* Contenido — scroll interno si la pantalla es pequeña */}
+        <div className="max-h-[55vh] space-y-4 overflow-y-auto px-5 py-5 text-sm text-slate-700 sm:max-h-none sm:space-y-5 sm:px-8 sm:py-6">
 
           <p className="text-base leading-relaxed">
             Esta app nació de una idea sencilla: <strong>recorrer todas las iglesias de Madrid</strong> y llevar un registro de cuáles has visitado.
@@ -84,10 +88,10 @@ export default function BienvenidaModal() {
         </div>
 
         {/* Botón */}
-        <div className="border-t border-slate-100 px-8 py-4">
+        <div className="border-t border-slate-100 px-5 py-4 sm:px-8">
           <button
             onClick={cerrar}
-            className="w-full rounded-xl bg-amber-700 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-amber-800 active:bg-amber-900"
+            className="w-full rounded-xl bg-amber-700 py-3.5 text-sm font-bold text-white shadow-sm transition hover:bg-amber-800 active:bg-amber-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
           >
             ¡Empezar la ruta! →
           </button>

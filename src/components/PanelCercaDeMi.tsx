@@ -111,7 +111,7 @@ export default function PanelCercaDeMi({
   return (
     <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
       {/* Cabecera del panel */}
-      <div className="flex items-center justify-between px-4 py-3">
+      <div className="flex items-center justify-between px-4 py-3.5">
         <div className="flex items-center gap-2">
           <span className="text-lg">📍</span>
           <div>
@@ -128,7 +128,7 @@ export default function PanelCercaDeMi({
           {estado === "idle" || estado === "denegado" || estado === "error" ? (
             <button
               onClick={pedirGeo}
-              className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition ${accentBtn}`}
+              className={`rounded-lg px-4 py-2 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 ${accentBtn}`}
             >
               {estado === "denegado" ? "Reintentar" : "Activar"}
             </button>
@@ -138,7 +138,7 @@ export default function PanelCercaDeMi({
             <button
               onClick={() => setAbierto((v) => !v)}
               aria-label={abierto ? "Cerrar lista de iglesias cercanas" : "Abrir lista de iglesias cercanas"}
-              className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 transition hover:bg-slate-50"
+              className="rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400"
             >
               {abierto ? "Ocultar ▲" : "Ver lista ▼"}
             </button>
@@ -177,31 +177,32 @@ export default function PanelCercaDeMi({
             return (
               <div
                 key={p.id}
-                className={`flex items-center gap-3 border-b border-slate-50 px-4 py-2.5 last:border-b-0 ${visitada ? "bg-green-50" : "hover:bg-slate-50"}`}
+                className={`flex items-center gap-3 border-b border-slate-50 px-4 py-3 last:border-b-0 ${visitada ? "bg-green-50" : "hover:bg-slate-50"}`}
               >
                 <div className="flex-1 min-w-0">
-                  <p className={`truncate text-sm font-medium ${visitada ? "text-green-700" : "text-slate-800"}`}>
+                  <p className={`truncate text-sm font-medium leading-tight ${visitada ? "text-green-700" : "text-slate-800"}`}>
                     {p.nombre}
                   </p>
-                  <p className="text-xs text-slate-400">{p.poblacion}</p>
+                  <p className="mt-0.5 text-xs text-slate-400">{p.poblacion} · <span className={`font-semibold ${visitada ? "text-green-600" : accentBadge.includes("blue") ? "text-blue-600" : "text-amber-600"}`}>{formatDistancia(p.distanciaKm)}</span></p>
                 </div>
-                <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold ${accentBadge}`}>
-                  {formatDistancia(p.distanciaKm)}
-                </span>
+                {/* Toggle visitada — tap target mínimo 44px */}
                 <button
                   onClick={() => onToggleVisitada(p.id)}
                   aria-label={visitada ? `Quitar ${p.nombre} de visitadas` : `Marcar ${p.nombre} como visitada`}
-                  title={visitada ? "Quitar de visitadas" : "Marcar visitada"}
-                  className={`shrink-0 rounded-full w-7 h-7 flex items-center justify-center text-base transition-colors ${
-                    visitada ? "text-green-600 hover:text-green-800" : "text-slate-300 hover:text-green-500"
+                  className={`shrink-0 flex h-10 w-10 items-center justify-center rounded-full text-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-400 ${
+                    visitada
+                      ? "bg-green-500 text-white hover:bg-green-600"
+                      : "border border-slate-200 text-slate-300 hover:border-green-300 hover:text-green-500"
                   }`}
                 >
                   {visitada ? "✓" : "○"}
                 </button>
                 <Link
                   href={`/parroquia/${p.id}`}
-                  className={`shrink-0 text-xs font-medium underline underline-offset-2 transition ${
-                    ciudad === "barcelona" ? "text-blue-600 hover:text-blue-800" : "text-amber-600 hover:text-amber-800"
+                  className={`shrink-0 rounded-lg border px-3 py-2 text-xs font-semibold transition ${
+                    ciudad === "barcelona"
+                      ? "border-blue-200 text-blue-700 hover:bg-blue-50"
+                      : "border-amber-200 text-amber-700 hover:bg-amber-50"
                   }`}
                 >
                   Ver →

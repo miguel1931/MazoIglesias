@@ -13,7 +13,8 @@ export default function BotonVisitada({ id }: BotonVisitadaProps) {
   return (
     <button
       onClick={() => toggleVisitada(id)}
-      className={`inline-flex items-center gap-2 rounded-lg px-5 py-2.5 text-sm font-semibold shadow-sm transition ${
+      aria-label={visitada ? "Quitar de visitadas" : "Marcar como visitada"}
+      className={`flex w-full items-center justify-center gap-2 rounded-lg px-5 py-3 text-sm font-semibold shadow-sm transition sm:w-auto sm:py-2.5 ${
         visitada
           ? "bg-green-600 text-white hover:bg-green-700 active:bg-green-800"
           : "border border-green-300 bg-white text-green-700 hover:bg-green-50 active:bg-green-100"

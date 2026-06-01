@@ -112,7 +112,7 @@ export default function ParroquiaDetallePage({ params }: PageProps) {
   };
 
   return (
-    <div className="mx-auto max-w-2xl py-6">
+    <div className="mx-auto max-w-2xl py-4 sm:py-6">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
@@ -120,7 +120,7 @@ export default function ParroquiaDetallePage({ params }: PageProps) {
       {/* Enlace de vuelta */}
       <Link
         href={backHref}
-        className={`mb-6 inline-flex items-center gap-1 text-sm font-medium ${accentLinkClass}`}
+        className={`mb-4 inline-flex items-center gap-1 text-sm font-medium ${accentLinkClass}`}
       >
         ← Volver al explorador
       </Link>
@@ -128,15 +128,15 @@ export default function ParroquiaDetallePage({ params }: PageProps) {
       {/* Tarjeta de detalle */}
       <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-md">
         {/* Cabecera con color */}
-        <div className={`bg-gradient-to-r ${accentColor} px-6 py-5 text-white`}>
-          <h1 className="text-xl font-bold sm:text-2xl">{parroquia.nombre}</h1>
-          <p className="mt-1 text-sm opacity-80">
-            {parroquia.advocacion}
-          </p>
+        <div className={`bg-gradient-to-r ${accentColor} px-4 py-5 sm:px-6 text-white`}>
+          <h1 className="text-lg font-bold sm:text-2xl">{parroquia.nombre}</h1>
+          {parroquia.advocacion && (
+            <p className="mt-1 text-sm opacity-80">{parroquia.advocacion}</p>
+          )}
         </div>
 
         {/* Cuerpo */}
-        <div className="space-y-5 px-6 py-5">
+        <div className="space-y-5 px-4 py-5 sm:px-6">
           {/* Dirección */}
           <div>
             <h2 className="text-xs font-semibold uppercase tracking-wider text-slate-400">
@@ -204,12 +204,12 @@ export default function ParroquiaDetallePage({ params }: PageProps) {
           </div>
 
           {/* Acciones */}
-          <div className="flex flex-wrap gap-3 pt-2">
+          <div className="flex flex-col gap-3 pt-2 sm:flex-row">
             <a
               href={googleMapsUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className={`inline-flex items-center gap-2 rounded-lg px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition ${accentBtnClass}`}
+              className={`flex items-center justify-center gap-2 rounded-lg px-5 py-3 text-sm font-semibold text-white shadow-sm transition sm:py-2.5 ${accentBtnClass}`}
             >
               🗺️ Cómo llegar
             </a>

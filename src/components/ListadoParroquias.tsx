@@ -62,7 +62,7 @@ export default function ListadoParroquias({
   return (
     <div className="flex flex-col gap-2 rounded-xl border border-slate-200 bg-white shadow-sm">
       {/* Lista */}
-      <div className="custom-scrollbar max-h-[40vh] space-y-2 overflow-y-auto p-3 lg:max-h-[72vh]">
+      <div className="custom-scrollbar max-h-[52vh] space-y-2 overflow-y-auto p-3 lg:max-h-[72vh]">
         {pagina_actual.map((parroquia) => (
           <ParroquiaCard
             key={parroquia.id}
