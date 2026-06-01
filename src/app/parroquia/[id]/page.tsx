@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import parroquiasData from "../../../../public/parroquias.json";
 import parroquiasBcnData from "../../../../public/parroquias_bcn.json";
 import type { Parroquia } from "@/types/parroquia";
@@ -10,8 +11,41 @@ const todasMadrid: Parroquia[] = parroquiasData as Parroquia[];
 const todasBcn: Parroquia[] = parroquiasBcnData as Parroquia[];
 const todasLasParroquias: Parroquia[] = [...todasMadrid, ...todasBcn];
 
+const BASE_URL = "https://mazo-iglesias.vercel.app";
+
 interface PageProps {
   params: { id: string };
+}
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const parroquia = todasLasParroquias.find((p) => p.id === params.id);
+  if (!parroquia) return { title: "Parroquia no encontrada | MazoIglesias" };
+
+  const esBcn = todasBcn.some((p) => p.id === params.id);
+  const ciudad = esBcn ? "Barcelona" : "Madrid";
+  const diocesis = esBcn ? "Arquebisbat de Barcelona" : "Archidiócesis de Madrid";
+  const title = `${parroquia.nombre} — ${ciudad} | MazoIglesias`;
+  const description = `${parroquia.nombre} en ${parroquia.poblacion}. ${parroquia.direccion}, ${parroquia.cp}. ${diocesis}.`;
+  const url = `${BASE_URL}/parroquia/${params.id}`;
+
+  return {
+    title,
+    description,
+    alternates: { canonical: url },
+    openGraph: {
+      title: `${parroquia.nombre} — ${ciudad}`,
+      description,
+      url,
+      siteName: "MazoIglesias",
+      locale: esBcn ? "ca_ES" : "es_ES",
+      type: "website",
+    },
+    twitter: {
+      card: "summary",
+      title: `${parroquia.nombre} — ${ciudad}`,
+      description,
+    },
+  };
 }
 
 export function generateStaticParams() {
@@ -22,7 +56,7 @@ export default function ParroquiaDetallePage({ params }: PageProps) {
   const parroquia = todasLasParroquias.find((p) => p.id === params.id);
 
   const esBcn = todasBcn.some((p) => p.id === params.id);
-  const labelZona = esBcn ? "Decanato" : "Vicaria";
+  const labelZona = esBcn ? "Decanato" : "Vicaría";
   const accentColor = esBcn ? "from-blue-700 to-blue-800" : "from-amber-700 to-amber-800";
   const accentBadgeClass = esBcn ? "bg-blue-100 text-blue-800" : "bg-amber-100 text-amber-800";
   const accentLinkClass = esBcn
@@ -51,8 +85,38 @@ export default function ParroquiaDetallePage({ params }: PageProps) {
     `${parroquia.direccion}, ${parroquia.cp} ${parroquia.poblacion}`
   )}`;
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Church",
+    name: parroquia.nombre,
+    alternateName: parroquia.advocacion || undefined,
+    address: {
+      "@type": "PostalAddress",
+      streetAddress: parroquia.direccion,
+      postalCode: parroquia.cp,
+      addressLocality: parroquia.poblacion,
+      addressCountry: "ES",
+    },
+    geo: {
+      "@type": "GeoCoordinates",
+      latitude: parroquia.lat,
+      longitude: parroquia.lng,
+    },
+    ...(parroquia.telefono ? { telephone: parroquia.telefono } : {}),
+    ...(parroquia.email ? { email: parroquia.email } : {}),
+    containedInPlace: {
+      "@type": "City",
+      name: esBcn ? "Barcelona" : "Madrid",
+    },
+    url: `${BASE_URL}/parroquia/${parroquia.id}`,
+  };
+
   return (
     <div className="mx-auto max-w-2xl py-6">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       {/* Enlace de vuelta */}
       <Link
         href={backHref}
@@ -76,7 +140,7 @@ export default function ParroquiaDetallePage({ params }: PageProps) {
           {/* Dirección */}
           <div>
             <h2 className="text-xs font-semibold uppercase tracking-wider text-slate-400">
-              Direccion
+              Dirección
             </h2>
             <p className="mt-1 text-sm text-slate-700">
               {parroquia.direccion}
@@ -147,7 +211,7 @@ export default function ParroquiaDetallePage({ params }: PageProps) {
               rel="noopener noreferrer"
               className={`inline-flex items-center gap-2 rounded-lg px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition ${accentBtnClass}`}
             >
-              🗺️ Como llegar
+              🗺️ Cómo llegar
             </a>
             <BotonVisitada id={parroquia.id} />
           </div>

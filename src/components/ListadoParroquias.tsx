@@ -14,6 +14,8 @@ interface ListadoParroquiasProps {
   onSeleccionar: (parroquia: Parroquia) => void;
   onToggleVisitada: (id: string) => void;
   ciudad: "madrid" | "barcelona";
+  busqueda?: string;
+  vicariaFiltrada?: number | null;
 }
 
 export default function ListadoParroquias({
@@ -23,6 +25,8 @@ export default function ListadoParroquias({
   onSeleccionar,
   onToggleVisitada,
   ciudad,
+  busqueda = "",
+  vicariaFiltrada = null,
 }: ListadoParroquiasProps) {
   const [pagina, setPagina] = useState(1);
   const { getColor } = useColores();
@@ -33,9 +37,20 @@ export default function ListadoParroquias({
   }, [parroquias]);
 
   if (parroquias.length === 0) {
+    const pistas: string[] = [];
+    if (busqueda.trim()) pistas.push(`quita el texto "${busqueda.trim()}"`);
+    if (vicariaFiltrada !== null) {
+      const labelVicaria = ciudad === "barcelona" ? "decanato" : "vicaría";
+      pistas.push(`quita el filtro de ${labelVicaria}`);
+    }
     return (
-      <div className="flex h-40 items-center justify-center rounded-xl border border-dashed border-slate-300 bg-white text-sm text-slate-400">
-        No se encontraron parroquias con esos filtros.
+      <div className="flex h-40 flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-slate-300 bg-white px-4 text-center">
+        <p className="text-sm font-medium text-slate-500">Sin resultados</p>
+        {pistas.length > 0 && (
+          <p className="text-xs text-slate-400">
+            Prueba a {pistas.join(" o ")}.
+          </p>
+        )}
       </div>
     );
   }

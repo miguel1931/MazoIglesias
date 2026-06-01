@@ -3,9 +3,12 @@ import "./globals.css";
 import BienvenidaModal from "@/components/BienvenidaModal";
 
 export const metadata: Metadata = {
-  title: "Parroquias de Madrid",
+  title: {
+    default: "MazoIglesias — Explorador de Parroquias",
+    template: "%s | MazoIglesias",
+  },
   description:
-    "Explorador interactivo de las parroquias de la Archidiócesis de Madrid",
+    "Explorador interactivo de parroquias de Madrid y Barcelona. 703 fichas con mapa, fotos y seguimiento de visitas.",
 };
 
 export default function RootLayout({
@@ -22,10 +25,10 @@ export default function RootLayout({
         <header className="bg-gradient-to-r from-amber-700 via-amber-800 to-amber-900 text-white shadow-md">
           <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
             <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
-              ⛪ Parroquias de Madrid
+              ⛪ MazoIglesias
             </h1>
             <p className="mt-1 text-sm text-amber-200">
-              Archidiócesis de Madrid — Explorador interactivo
+              Explorador interactivo de parroquias
             </p>
           </div>
         </header>

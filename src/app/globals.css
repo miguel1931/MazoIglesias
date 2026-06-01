@@ -2,6 +2,25 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ── Design tokens ──────────────────────────────────────────────────────── */
+:root {
+  --color-madrid: theme('colors.amber.700');
+  --color-madrid-dark: theme('colors.amber.800');
+  --color-madrid-light: theme('colors.amber.100');
+  --color-barcelona: theme('colors.blue.700');
+  --color-barcelona-dark: theme('colors.blue.800');
+  --color-barcelona-light: theme('colors.blue.100');
+  /* Colores del mapa — sincronizados con Tailwind para no duplicar en JS */
+  --map-pin-madrid: #b45309;      /* amber-700 */
+  --map-pin-barcelona: #1d4ed8;   /* blue-700 */
+  --map-pin-visitada: #16a34a;    /* green-600 */
+  --map-cluster: rgba(180,83,9,0.85);
+  --map-solo-tu: #d97706;         /* amber-600 */
+  --map-solo-amigo: #6366f1;      /* indigo-500 */
+  --map-ambos: #22c55e;           /* green-500 */
+  --map-ninguno: #cbd5e1;         /* slate-300 */
+}
+
 /* MapLibre GL JS */
 .maplibregl-map {
   width: 100%;

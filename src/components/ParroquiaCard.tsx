@@ -23,7 +23,7 @@ export default function ParroquiaCard({
   onToggleVisitada,
   ciudad,
 }: ParroquiaCardProps) {
-  const labelZona = ciudad === "barcelona" ? "Decanato" : "Vicaria";
+  const labelZona = ciudad === "barcelona" ? "Decanato" : "Vicaría";
   const accentBadge = ciudad === "barcelona"
     ? "bg-blue-100 text-blue-700"
     : "bg-amber-100 text-amber-700";
@@ -39,15 +39,19 @@ export default function ParroquiaCard({
 
   const colorDef = color ? COLORES.find((c) => c.id === color) : null;
 
+  const visitadaOverride = visitada
+    ? "border-green-300 bg-green-50 shadow-sm"
+    : seleccionada
+    ? accentSelected
+    : accentHover;
+
   return (
     <div
       onClick={() => onSeleccionar(parroquia)}
-      className={`cursor-pointer rounded-lg border p-3 transition-all ${
-        seleccionada ? accentSelected : accentHover
-      }`}
+      className={`cursor-pointer rounded-lg border p-3 transition-all ${visitadaOverride}`}
     >
       <div className="flex items-start justify-between gap-2">
-        <h3 className="text-sm font-semibold text-slate-800">
+        <h3 className={`text-sm font-semibold ${visitada ? "text-green-800" : "text-slate-800"}`}>
           {parroquia.nombre}
         </h3>
         <div className="flex shrink-0 items-center gap-1.5">
@@ -60,9 +64,12 @@ export default function ParroquiaCard({
           )}
           <button
             onClick={(e: React.MouseEvent) => { e.stopPropagation(); onToggleVisitada(parroquia.id); }}
+            aria-label={visitada ? `Quitar ${parroquia.nombre} de visitadas` : `Marcar ${parroquia.nombre} como visitada`}
             title={visitada ? "Quitar de visitadas" : "Marcar como visitada"}
-            className={`rounded-full px-1 text-lg leading-none transition-colors ${
-              visitada ? "text-green-500 hover:text-green-700" : "text-slate-300 hover:text-green-400"
+            className={`flex h-7 w-7 items-center justify-center rounded-full text-base transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-400 ${
+              visitada
+                ? "bg-green-500 text-white hover:bg-green-600"
+                : "border border-slate-200 text-slate-300 hover:border-green-300 hover:text-green-500"
             }`}
           >
             {visitada ? "✓" : "○"}
@@ -78,8 +85,8 @@ export default function ParroquiaCard({
           {labelZona} {parroquia.vicaria}
         </span>
         {visitada && (
-          <span className="inline-flex items-center rounded-full bg-green-100 px-2 py-0.5 text-[10px] font-medium text-green-700">
-            Visitada
+          <span className="inline-flex items-center gap-0.5 rounded-full bg-green-100 px-2 py-0.5 text-[10px] font-semibold text-green-700">
+            ✓ Visitada
           </span>
         )}
       </div>

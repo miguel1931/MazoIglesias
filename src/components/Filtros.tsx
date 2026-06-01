@@ -2,8 +2,12 @@
 
 import { useRef, useState } from "react";
 
+export type OrdenLista = "alfa" | "vicaria" | "visitadas-primero" | "pendientes-primero";
+
 interface FiltrosProps {
   onFiltrar: (texto: string, vicaria: number | null, soloVisitadas: boolean) => void;
+  onOrden: (orden: OrdenLista) => void;
+  orden: OrdenLista;
   totalVisitadas: number;
   onExportar: (conFotos?: boolean) => void | Promise<void>;
   onCompartir: (conFotos?: boolean) => void | Promise<void>;
@@ -16,6 +20,8 @@ const DECANATOS_BCN = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as const;
 
 export default function Filtros({
   onFiltrar,
+  onOrden,
+  orden,
   totalVisitadas,
   onExportar,
   onCompartir,
@@ -31,6 +37,7 @@ export default function Filtros({
 
   const opciones = ciudad === "madrid" ? VICARIAS_MADRID : DECANATOS_BCN;
   const labelFiltro = ciudad === "madrid" ? "Vicaría" : "Decanato";
+  const labelFiltroPlural = ciudad === "madrid" ? "Todas las vicarías" : "Todos los decanatos";
   const accentColor =
     ciudad === "madrid"
       ? "focus:border-amber-500 focus:ring-amber-500/30"
@@ -104,12 +111,30 @@ export default function Filtros({
             onChange={(e) => handleVicaria(e.target.value)}
             className={`w-full rounded-lg border border-slate-300 px-3 py-2 text-sm shadow-sm transition focus:outline-none focus:ring-2 ${accentColor}`}
           >
-            <option value="">Todos los {labelFiltro.toLowerCase()}s</option>
+            <option value="">{labelFiltroPlural}</option>
             {opciones.map((v) => (
               <option key={v} value={v}>
                 {labelFiltro} {v}
               </option>
             ))}
+          </select>
+        </div>
+
+        {/* Selector de orden */}
+        <div className="w-full sm:w-44">
+          <label htmlFor="orden" className="mb-1 block text-xs font-medium text-slate-500">
+            Ordenar por
+          </label>
+          <select
+            id="orden"
+            value={orden}
+            onChange={(e) => onOrden(e.target.value as OrdenLista)}
+            className={`w-full rounded-lg border border-slate-300 px-3 py-2 text-sm shadow-sm transition focus:outline-none focus:ring-2 ${accentColor}`}
+          >
+            <option value="alfa">Alfabético</option>
+            <option value="vicaria">{labelFiltro}</option>
+            <option value="visitadas-primero">Visitadas primero</option>
+            <option value="pendientes-primero">Pendientes primero</option>
           </select>
         </div>
 
@@ -149,8 +174,9 @@ export default function Filtros({
                 setMenuExportar(false);
               }}
               disabled={totalVisitadas === 0}
+              aria-label="Compartir progreso con amigos"
               title="Compartir con amigos"
-              className="rounded-lg border border-indigo-200 bg-indigo-50 px-3 py-1.5 text-xs font-medium text-indigo-700 transition hover:bg-indigo-100 disabled:opacity-40"
+              className="rounded-lg border border-indigo-200 bg-indigo-50 px-3 py-1.5 text-xs font-medium text-indigo-700 transition hover:bg-indigo-100 disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400"
             >
               📤 Compartir
             </button>
@@ -198,8 +224,9 @@ export default function Filtros({
                 setMenuCompartir(false);
               }}
               disabled={totalVisitadas === 0}
+              aria-label="Exportar datos como JSON"
               title="Exportar como JSON"
-              className="rounded-lg border border-green-200 bg-green-50 px-3 py-1.5 text-xs font-medium text-green-700 transition hover:bg-green-100 disabled:opacity-40"
+              className="rounded-lg border border-green-200 bg-green-50 px-3 py-1.5 text-xs font-medium text-green-700 transition hover:bg-green-100 disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-400"
             >
               Exportar ↓
             </button>
@@ -242,8 +269,9 @@ export default function Filtros({
           {/* Importar */}
           <button
             onClick={handleImportarClick}
+            aria-label="Importar visitadas desde fichero JSON"
             title="Importar visitadas desde JSON"
-            className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-medium text-slate-600 transition hover:bg-slate-100"
+            className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-medium text-slate-600 transition hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400"
           >
             Importar ↑
           </button>

@@ -4,11 +4,12 @@ import { useState, useCallback, useMemo, useEffect } from "react";
 import type { Parroquia } from "@/types/parroquia";
 import parroquiasDataMadrid from "../../public/parroquias.json";
 import parroquiasDataBcn from "../../public/parroquias_bcn.json";
-import Filtros from "@/components/Filtros";
+import Filtros, { type OrdenLista } from "@/components/Filtros";
 import ListadoParroquias from "@/components/ListadoParroquias";
 import PanelAmigos from "@/components/PanelAmigos";
 import ModalNombre from "@/components/ModalNombre";
 import { useVisitadas } from "@/hooks/useVisitadas";
+import PanelCercaDeMi from "@/components/PanelCercaDeMi";
 import { useJugador } from "@/hooks/useJugador";
 import { useAmigos } from "@/hooks/useAmigos";
 import dynamic from "next/dynamic";
@@ -35,6 +36,7 @@ export default function HomePage() {
   const [busqueda, setBusqueda] = useState("");
   const [vicariaSeleccionada, setVicariaSeleccionada] = useState<number | null>(null);
   const [soloVisitadas, setSoloVisitadas] = useState(false);
+  const [orden, setOrden] = useState<OrdenLista>("alfa");
   const [parroquiaSeleccionada, setParroquiaSeleccionada] = useState<Parroquia | null>(null);
 
   // ── Mostrar modal de nombre cuando se accede a la tab de amigos ──
@@ -75,8 +77,26 @@ export default function HomePage() {
     if (soloVisitadas) {
       lista = lista.filter((p) => visitadas.has(p.id));
     }
+    // Ordenar
+    if (orden === "alfa") {
+      lista = [...lista].sort((a, b) => a.nombre.localeCompare(b.nombre, "es"));
+    } else if (orden === "vicaria") {
+      lista = [...lista].sort((a, b) => a.vicaria - b.vicaria || a.nombre.localeCompare(b.nombre, "es"));
+    } else if (orden === "visitadas-primero") {
+      lista = [...lista].sort((a, b) => {
+        const va = visitadas.has(a.id) ? 0 : 1;
+        const vb = visitadas.has(b.id) ? 0 : 1;
+        return va - vb || a.nombre.localeCompare(b.nombre, "es");
+      });
+    } else if (orden === "pendientes-primero") {
+      lista = [...lista].sort((a, b) => {
+        const va = visitadas.has(a.id) ? 1 : 0;
+        const vb = visitadas.has(b.id) ? 1 : 0;
+        return va - vb || a.nombre.localeCompare(b.nombre, "es");
+      });
+    }
     return lista;
-  }, [busqueda, vicariaSeleccionada, soloVisitadas, visitadas, todasLasParroquias]);
+  }, [busqueda, vicariaSeleccionada, soloVisitadas, orden, visitadas, todasLasParroquias]);
 
   const handleFiltrar = useCallback(
     (texto: string, vicaria: number | null, soloVis: boolean) => {
@@ -141,6 +161,9 @@ export default function HomePage() {
     })();
   }, [visitadas]); // re-count when visitadas changes (proxy for activity)
 
+  const totalIglesias = todasLasParroquias.length;
+  const pctVisitadas = totalIglesias > 0 ? Math.round((visitadas.size / totalIglesias) * 100) : 0;
+
   return (
     <div className="space-y-4">
       {/* ── Modal nombre ── */}
@@ -148,9 +171,74 @@ export default function HomePage() {
         <ModalNombre onGuardar={handleGuardarNombre} />
       )}
 
+      {/* ── Selector de ciudad + progreso ── */}
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white p-3 shadow-sm">
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => handleCiudad("madrid")}
+            aria-label="Ver parroquias de Madrid"
+            className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-semibold transition-all border ${
+              ciudad === "madrid"
+                ? "bg-amber-700 text-white border-amber-800 shadow-sm"
+                : "bg-white text-slate-600 border-slate-200 hover:border-amber-300 hover:text-amber-700"
+            }`}
+          >
+            🏛️ Madrid
+            <span className={`rounded-full px-1.5 py-0.5 text-[10px] font-bold ${ciudad === "madrid" ? "bg-amber-600 text-amber-100" : "bg-slate-100 text-slate-500"}`}>
+              {todasMadrid.length}
+            </span>
+          </button>
+          <button
+            onClick={() => handleCiudad("barcelona")}
+            aria-label="Ver parroquias de Barcelona"
+            className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-semibold transition-all border ${
+              ciudad === "barcelona"
+                ? "bg-blue-700 text-white border-blue-800 shadow-sm"
+                : "bg-white text-slate-600 border-slate-200 hover:border-blue-300 hover:text-blue-700"
+            }`}
+          >
+            ⛪ Barcelona
+            <span className={`rounded-full px-1.5 py-0.5 text-[10px] font-bold ${ciudad === "barcelona" ? "bg-blue-600 text-blue-100" : "bg-slate-100 text-slate-500"}`}>
+              {todasBcn.length}
+            </span>
+          </button>
+        </div>
+
+        {/* Badge de progreso */}
+        <div className="flex items-center gap-3">
+          <div className="text-right">
+            <p className="text-xs font-semibold text-slate-700">
+              {visitadas.size} <span className="font-normal text-slate-400">/ {totalIglesias} visitadas</span>
+            </p>
+            <div className="mt-1 h-1.5 w-32 overflow-hidden rounded-full bg-slate-100">
+              <div
+                className={`h-full rounded-full transition-all duration-500 ${ciudad === "barcelona" ? "bg-blue-500" : "bg-amber-500"}`}
+                style={{ width: `${pctVisitadas}%` }}
+              />
+            </div>
+          </div>
+          <span className={`rounded-full px-2.5 py-1 text-sm font-bold ${ciudad === "barcelona" ? "bg-blue-100 text-blue-700" : "bg-amber-100 text-amber-700"}`}>
+            {pctVisitadas}%
+          </span>
+        </div>
+      </div>
+
+      {/* ── Panel Cerca de mí ── */}
+      <PanelCercaDeMi
+        parroquias={todasLasParroquias}
+        visitadas={visitadas}
+        onToggleVisitada={toggleVisitada}
+        ciudad={ciudad}
+        onCambiarCiudad={handleCiudad}
+        todasMadrid={todasMadrid}
+        todasBcn={todasBcn}
+      />
+
       {/* Filtros */}
       <Filtros
         onFiltrar={handleFiltrar}
+        onOrden={setOrden}
+        orden={orden}
         totalVisitadas={visitadas.size}
         onExportar={exportar}
         onCompartir={compartir}
@@ -213,6 +301,8 @@ export default function HomePage() {
                 onSeleccionar={handleSeleccionar}
                 onToggleVisitada={toggleVisitada}
                 ciudad={ciudad}
+                busqueda={busqueda}
+                vicariaFiltrada={vicariaSeleccionada}
               />
             </div>
             <div className="flex-1">
@@ -247,50 +337,6 @@ export default function HomePage() {
         </div>
       )}
 
-      {/* ── Selector de ciudad ── */}
-      <div className="mt-6 flex items-center justify-center gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-        <span className="hidden text-xs font-semibold uppercase tracking-wider text-slate-400 sm:block">
-          Cambiar ciudad
-        </span>
-        <button
-          onClick={() => handleCiudad("madrid")}
-          className={`flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold transition-all shadow-sm border ${
-            ciudad === "madrid"
-              ? "bg-amber-700 text-white border-amber-800"
-              : "bg-white text-slate-600 border-slate-200 hover:border-amber-300 hover:text-amber-700"
-          }`}
-        >
-          🏛️ Madrid
-          <span
-            className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
-              ciudad === "madrid"
-                ? "bg-amber-600 text-amber-100"
-                : "bg-slate-100 text-slate-500"
-            }`}
-          >
-            {todasMadrid.length}
-          </span>
-        </button>
-        <button
-          onClick={() => handleCiudad("barcelona")}
-          className={`flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold transition-all shadow-sm border ${
-            ciudad === "barcelona"
-              ? "bg-blue-700 text-white border-blue-800"
-              : "bg-white text-slate-600 border-slate-200 hover:border-blue-300 hover:text-blue-700"
-          }`}
-        >
-          ⛪ Barcelona
-          <span
-            className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
-              ciudad === "barcelona"
-                ? "bg-blue-600 text-blue-100"
-                : "bg-slate-100 text-slate-500"
-            }`}
-          >
-            {todasBcn.length}
-          </span>
-        </button>
-      </div>
     </div>
   );
 }
