@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import BienvenidaModal from "@/components/BienvenidaModal";
+import { Analytics } from "@vercel/analytics/next";
 
 export const metadata: Metadata = {
   title: {
@@ -56,6 +57,7 @@ export default function RootLayout({
             FOC I FERRO, CARN I CODI
           </p>
         </footer>
+        <Analytics />
       </body>
     </html>
   );
